@@ -1,8 +1,10 @@
 # BFH
 
+A Python DSL for schema transformations
+
 ![bfh](http://timberframe-postandbeamhomes.com/media/uploads/galleries/trusses/naked_trusses/iain_with_beatle_hammer.jpg)
 
-Put square pegs in round holes.
+Look, you can put square pegs in round holes:
 
 ```python
 class SquarePeg(Schema):
@@ -82,6 +84,6 @@ broken_peg.validate()
 
 ## Build Status
 
-[![Build Status](https://travis-ci.org/benauthor/bfh.svg?branch=master)](https://travis-ci.org/benauthor/bfh)
+[![Circle CI](https://circleci.com/gh/percolate/bfh.svg?style=svg)](https://circleci.com/gh/percolate/bfh)
 
 Curretly failing on Py3k ...
