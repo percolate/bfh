@@ -151,6 +151,11 @@ class NumberField(SimpleTypeField):
     field_type = float
 
 
+class DatetimeField(SimpleTypeField):
+
+    field_type = datetime
+
+
 class UnicodeField(SimpleTypeField):
     """
     A field that contains strings.
@@ -207,6 +212,9 @@ class ObjectField(SimpleTypeField):
         if value is None:
             value = {}
 
+        # TODO self.required isn't really the best assumption. we
+        # should actually pass implicit_nulls flag down the chain
+        # to all serializations and use that to decide.
         if not self.required:
             if all(v in (None, [], {}, '') for v in value.values()):
                 value = {}
@@ -267,8 +275,3 @@ class ArrayField(SimpleTypeField):
         if isinstance(value, self.field_type):
             return [self._flatten(i) for i in value]
         return value
-
-
-class DatetimeField(SimpleTypeField):
-
-    field_type = datetime
