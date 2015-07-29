@@ -4,6 +4,7 @@ Fields that can go on Schemas
 """
 from __future__ import absolute_import
 
+import re
 from datetime import datetime
 
 from .common import nullish
@@ -21,6 +22,7 @@ __all__ = [
     "BooleanField",
     "DatetimeField",
     "Field",
+    "IsoDateString",
     "IntegerField",
     "NumberField",
     "ObjectField",
@@ -189,6 +191,18 @@ class UnicodeField(SimpleTypeField):
             return self._coerce(value)
         except Invalid:  # we are not in the business of validation here
             return value
+
+
+class IsoDateString(UnicodeField):
+
+    ISO_REGEX = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+
+    def validate(self, value):
+        super(IsoDateString, self).validate(value)
+        if not bool(self.ISO_REGEX.match(value)):
+            raise Invalid("%s not an ISO 8601 date string")
+
+        return True
 
 
 class ObjectField(SimpleTypeField):

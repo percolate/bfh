@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
 
+import datetime
+
 from bfh import Schema
 from bfh.exceptions import Invalid
 from bfh.fields import (
     ObjectField,
     IntegerField,
+    IsoDateString,
     UnicodeField,
     ArrayField,
     Subschema
@@ -204,6 +207,22 @@ class TestFieldValidation(TestCase):
 
         innermost = Outer(maybe=Inner(maybe=MostIn(foo=None)))
         assert innermost.validate()
+
+    def test_isodatestring_validation(self):
+        field = IsoDateString()
+
+        assert field.validate("2015-10-11T00:00:00")
+        assert field.validate("2015-10-11T00:00:00Z")
+        assert field.validate("2015-10-11T00:00:00+00:00")
+
+        with self.assertRaises(Invalid):
+            field.validate("not a date string")
+
+        with self.assertRaises(Invalid):
+            field.validate(1)
+
+        with self.assertRaises(Invalid):
+            field.validate(datetime.datetime.now())
 
 
 class TestFieldSerialization(TestCase):
