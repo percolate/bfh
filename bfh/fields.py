@@ -52,7 +52,7 @@ class Field(FieldInterface):
     def __set__(self, instance, value):
         instance.__dict__[self.field_name] = value
 
-    def serialize(self, value):
+    def serialize(self, value, **kwargs):
         return value
 
     def validate(self, value):
@@ -91,14 +91,14 @@ class Subschema(Field):
         else:
             instance.__dict__[self.field_name] = value
 
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         if hasattr(value, "serialize"):
-            value = value.serialize()
+            value = value.serialize(implicit_nulls=implicit_nulls)
 
         if value is None:
             value = {}
 
-        if not self.required:
+        if isinstance(value, dict) and implicit_nulls:
             if all(nullish(v) for v in value.values()):
                 value = {}
 
@@ -186,7 +186,7 @@ class UnicodeField(SimpleTypeField):
             return super(UnicodeField, self).validate(value)
         return super(UnicodeField, self).validate(self._coerce(value))
 
-    def serialize(self, value):
+    def serialize(self, value, **kwargs):
         try:
             return self._coerce(value)
         except Invalid:  # we are not in the business of validation here
@@ -219,18 +219,15 @@ class ObjectField(SimpleTypeField):
             value.validate()
         return True
 
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         if hasattr(value, "serialize"):
-            value = value.serialize()
+            value = value.serialize(implicit_nulls=implicit_nulls)
 
         if value is None:
             value = {}
 
-        # TODO self.required isn't really the best assumption. we
-        # should actually pass implicit_nulls flag down the chain
-        # to all serializations and use that to decide.
-        if not self.required:
-            if all(v in (None, [], {}, '') for v in value.values()):
+        if isinstance(value, dict) and implicit_nulls:
+            if all(nullish(v) for v in value.values()):
                 value = {}
 
         return value
@@ -252,9 +249,9 @@ class ArrayField(SimpleTypeField):
         super(ArrayField, self).__init__(**kwargs)
         self.array_type = array_type
 
-    def _flatten(self, value):
+    def _flatten(self, value, implicit_nulls=True):
         if hasattr(value, 'serialize'):
-            return value.serialize()
+            return value.serialize(implicit_nulls=implicit_nulls)
         return value
 
     @property
@@ -285,7 +282,12 @@ class ArrayField(SimpleTypeField):
 
         return True
 
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         if isinstance(value, self.field_type):
-            return [self._flatten(i) for i in value]
+            items = []
+            for i in value:
+                flat = self._flatten(i, implicit_nulls=implicit_nulls)
+                if not nullish(flat, implicit_nulls=implicit_nulls):
+                    items.append(flat)
+            return items
         return value

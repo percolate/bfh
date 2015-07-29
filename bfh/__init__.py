@@ -78,7 +78,7 @@ class Schema(SchemaInterface):
                 value = value.serialize(implicit_nulls=implicit_nulls)
 
             if hasattr(field, "serialize"):
-                value = field.serialize(value)
+                value = field.serialize(value, implicit_nulls=implicit_nulls)
 
             if implicit_nulls and nullish(value,
                                           implicit_nulls=implicit_nulls):

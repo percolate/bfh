@@ -29,7 +29,7 @@ class FieldInterface(object):
         """
 
     @abstractmethod
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         """
         Serialize the field.
 

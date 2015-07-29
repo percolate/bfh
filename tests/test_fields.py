@@ -250,6 +250,10 @@ class TestFieldSerialization(TestCase):
         field = ArrayField(Subschema)
         source = [SomeSchema(wat=1), SomeSchema(wat=2)]
         self.assertEqual([{"wat": 1}, {"wat": 2}], field.serialize(source))
+        source = [SomeSchema(), SomeSchema()]
+        self.assertEqual([], field.serialize(source))
+        self.assertEqual([{"wat": None}, {"wat": None}],
+                         field.serialize(source, implicit_nulls=False))
 
     def test_object_serialization(self):
         field = ObjectField()
@@ -269,10 +273,9 @@ class TestFieldSerialization(TestCase):
         source = SomeSchema(great=[1, 2, 3])
         self.assertEqual({"great": [1, 2, 3]}, field.serialize(source))
 
-        # TODO implicit nulls by default
-        # source = {"implicit": None}
-        # self.assertEqual({}, field.serialize(source))
-        # self.assertEqual(source, field.serialize(source, implicit_nulls=False))
+        source = {"implicit": None}
+        self.assertEqual({}, field.serialize(source))
+        self.assertEqual(source, field.serialize(source, implicit_nulls=False))
 
     def test_subschema_serialization(self):
         class SomeSchema(Schema):
@@ -296,6 +299,8 @@ class TestFieldSerialization(TestCase):
         self.assertEqual({"great": [1, 2, 3]}, field.serialize(source))
         source = SomeSchema(great=None)
         self.assertEqual({}, field.serialize(source))
+        self.assertEqual({"great": None},
+                         field.serialize(source, implicit_nulls=False))
 
     def test_unicode_serialization(self):
         field = UnicodeField()
