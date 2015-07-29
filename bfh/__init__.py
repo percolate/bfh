@@ -111,15 +111,15 @@ class GenericSchema(Schema):
     A generic schema to use when none is specified.
 
     """
-    def __init__(self, as_dict):
+    def __init__(self, as_dict=None):
         """
         Args:
             as_dict (dict) - a blob from which to infer a schema
         """
-        self.__dict__ = as_dict
-        self._field_names = as_dict.keys()
+        self.__dict__ = as_dict or {}
+        self._field_names = as_dict.keys() if as_dict else []
 
-    def __get__(self, name):
+    def __getattr__(self, name):
         if name not in self._field_names:
             return None
         return self.__dict__[name]
