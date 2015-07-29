@@ -272,16 +272,3 @@ class ArrayField(SimpleTypeField):
 class DatetimeField(SimpleTypeField):
 
     field_type = datetime
-
-
-class IsoDateString(DatetimeField):
-    """
-    TODO this needn't exist. Transformation should happen in the mapping,
-    I think.
-
-    """
-    def serialize(self, value):
-        try:
-            return value.isoformat()
-        except AttributeError:
-            return value

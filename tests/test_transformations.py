@@ -14,6 +14,7 @@ from bfh.transformations import (
     Bool,
     Const,
     Concat,
+    DateToIsoString,
     Do,
     Get,
     Int,
@@ -207,6 +208,21 @@ class TestParseDate(TestCase):
             result = ParseDate(birthday)()
             self.assertEqual(datetime.datetime(1982, 8, 12, 10, tzinfo=utc),
                              result)
+
+
+class TestIsoFormatDate(TestCase):
+    def test_can_iso_format(self):
+        my_birthday = datetime.datetime(1982, 8, 12, 10, tzinfo=utc)
+        result = DateToIsoString(my_birthday)()
+        self.assertEqual(u'1982-08-12T10:00:00+00:00', result)
+
+    def test_raises_valueerror_on_bad_arg(self):
+        with self.assertRaises(ValueError):
+            DateToIsoString(1)()
+
+    def test_raises_valueerror_on_no_arg(self):
+        with self.assertRaises(ValueError):
+            DateToIsoString()()
 
 
 class TestSubmapping(TestCase):

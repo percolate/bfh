@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='bfh',
-    version="0.1.0",
+    version="0.1.1",
     description="Smacks schemas into other schemas",
     author="Evan Bender",
     install_requires=[

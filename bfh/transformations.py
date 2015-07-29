@@ -292,7 +292,7 @@ class ParseDate(Transformation):
     def tz(self):
         return self.kwargs.get("tz", self.DEFAULT_TIMEZONE)
 
-    def function(self, source, *call_args):
+    def function(self, source, *call_args):  # source ignored
         value = call_args[0]
         if isinstance(value, int):
             date = datetime.utcfromtimestamp(value)
@@ -305,3 +305,16 @@ class ParseDate(Transformation):
             date = date.replace(tzinfo=self.tz)
 
         return date
+
+
+class DateToIsoString(Transformation):
+    """
+    Turn a datetime into an ISO 8601 formatted string.
+
+    """
+    def function(self, source, *call_args):  # source ignored
+        try:
+            return call_args[0].isoformat()
+        except (IndexError, AttributeError):
+            raise ValueError("Not a datetime: %s" % (
+                call_args[0] if call_args else None))
