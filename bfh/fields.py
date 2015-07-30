@@ -4,6 +4,7 @@ Fields that can go on Schemas
 """
 from __future__ import absolute_import
 
+import re
 from datetime import datetime
 
 from .common import nullish
@@ -21,6 +22,7 @@ __all__ = [
     "BooleanField",
     "DatetimeField",
     "Field",
+    "IsoDateString",
     "IntegerField",
     "NumberField",
     "ObjectField",
@@ -50,7 +52,7 @@ class Field(FieldInterface):
     def __set__(self, instance, value):
         instance.__dict__[self.field_name] = value
 
-    def serialize(self, value):
+    def serialize(self, value, **kwargs):
         return value
 
     def validate(self, value):
@@ -89,14 +91,14 @@ class Subschema(Field):
         else:
             instance.__dict__[self.field_name] = value
 
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         if hasattr(value, "serialize"):
-            value = value.serialize()
+            value = value.serialize(implicit_nulls=implicit_nulls)
 
         if value is None:
             value = {}
 
-        if not self.required:
+        if isinstance(value, dict) and implicit_nulls:
             if all(nullish(v) for v in value.values()):
                 value = {}
 
@@ -151,6 +153,11 @@ class NumberField(SimpleTypeField):
     field_type = float
 
 
+class DatetimeField(SimpleTypeField):
+
+    field_type = datetime
+
+
 class UnicodeField(SimpleTypeField):
     """
     A field that contains strings.
@@ -179,11 +186,23 @@ class UnicodeField(SimpleTypeField):
             return super(UnicodeField, self).validate(value)
         return super(UnicodeField, self).validate(self._coerce(value))
 
-    def serialize(self, value):
+    def serialize(self, value, **kwargs):
         try:
             return self._coerce(value)
         except Invalid:  # we are not in the business of validation here
             return value
+
+
+class IsoDateString(UnicodeField):
+
+    ISO_REGEX = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+
+    def validate(self, value):
+        super(IsoDateString, self).validate(value)
+        if not bool(self.ISO_REGEX.match(value)):
+            raise Invalid("%s not an ISO 8601 date string")
+
+        return True
 
 
 class ObjectField(SimpleTypeField):
@@ -200,15 +219,15 @@ class ObjectField(SimpleTypeField):
             value.validate()
         return True
 
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         if hasattr(value, "serialize"):
-            value = value.serialize()
+            value = value.serialize(implicit_nulls=implicit_nulls)
 
         if value is None:
             value = {}
 
-        if not self.required:
-            if all(v in (None, [], {}, '') for v in value.values()):
+        if isinstance(value, dict) and implicit_nulls:
+            if all(nullish(v) for v in value.values()):
                 value = {}
 
         return value
@@ -230,9 +249,9 @@ class ArrayField(SimpleTypeField):
         super(ArrayField, self).__init__(**kwargs)
         self.array_type = array_type
 
-    def _flatten(self, value):
+    def _flatten(self, value, implicit_nulls=True):
         if hasattr(value, 'serialize'):
-            return value.serialize()
+            return value.serialize(implicit_nulls=implicit_nulls)
         return value
 
     @property
@@ -263,25 +282,12 @@ class ArrayField(SimpleTypeField):
 
         return True
 
-    def serialize(self, value):
+    def serialize(self, value, implicit_nulls=True):
         if isinstance(value, self.field_type):
-            return [self._flatten(i) for i in value]
+            items = []
+            for i in value:
+                flat = self._flatten(i, implicit_nulls=implicit_nulls)
+                if not nullish(flat, implicit_nulls=implicit_nulls):
+                    items.append(flat)
+            return items
         return value
-
-
-class DatetimeField(SimpleTypeField):
-
-    field_type = datetime
-
-
-class IsoDateString(DatetimeField):
-    """
-    TODO this needn't exist. Transformation should happen in the mapping,
-    I think.
-
-    """
-    def serialize(self, value):
-        try:
-            return value.isoformat()
-        except AttributeError:
-            return value

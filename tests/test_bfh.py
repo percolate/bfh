@@ -234,6 +234,29 @@ class TestSchemas(TestCase):
         self.assertEqual(extras, m._raw_input)
 
 
+class TestGenericSchema(TestCase):
+    def test_can_make_a_generic_schema_from_dict(self):
+        generic = GenericSchema({"foo": 1, "bar": 2, "baz": [3, 4, 5]})
+        self.assertEqual(generic.foo, 1)
+        self.assertEqual(generic.bar, 2)
+        self.assertEqual(generic.baz, [3, 4, 5])
+        self.assertIsNone(generic.qux)
+
+    def test_can_make_generic_piecemeal(self):
+        generic = GenericSchema()
+        generic.foo = 1
+        self.assertEqual(generic.foo, 1)
+        self.assertIsNone(generic.qux)
+        generic.qux = 'pah'
+        self.assertEqual(generic.qux, 'pah')
+
+    def test_generic_is_always_valid(self):
+        generic1 = GenericSchema()
+        assert generic1.validate()
+        generic2 = GenericSchema({"foo": {}, "bar": "great"})
+        assert generic2.validate()
+
+
 class OneToTwoBase(Mapping):
     peas = Get('my_str')
     carrots = Get('my_int')
