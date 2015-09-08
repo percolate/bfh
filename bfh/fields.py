@@ -198,6 +198,9 @@ class IsoDateString(UnicodeField):
     ISO_REGEX = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
     def validate(self, value):
+        if not self.required and value is None:
+            return True
+
         super(IsoDateString, self).validate(value)
         if not bool(self.ISO_REGEX.match(value)):
             raise Invalid("%s not an ISO 8601 date string")

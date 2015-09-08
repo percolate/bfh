@@ -35,8 +35,16 @@ class TestFieldValidation(TestCase):
 
     def test_optional_validation(self):
         """Fields are required by default but can be made optional"""
-        field = IntegerField(required=False)
-        assert field.validate(None)
+        fields = [
+            IntegerField(required=False),
+            UnicodeField(required=False),
+            ObjectField(required=False),
+            ArrayField(required=False),
+            IsoDateString(required=False),
+            # subschema tested elsewhere...
+        ]
+        for field in fields:
+            assert field.validate(None)
 
     def test_unicode_validation(self):
         field = UnicodeField()
