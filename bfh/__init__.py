@@ -11,7 +11,7 @@ from . import exceptions
 from . import fields
 from . import transformations
 
-from .version import VERSION as __version__
+from .version import __version__
 
 __all__ = [
     "Schema",
@@ -19,7 +19,6 @@ __all__ = [
     "exceptions",
     "fields",
     "transformations",
-    "__version__",
 ]
 
 
