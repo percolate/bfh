@@ -105,7 +105,7 @@ class SchemaInterface(object):
 
 class MappingInterface(object):
     """
-    Interface for a mapping class.
+    Interface for a Mapping class.
 
     """
     __metaclass__ = HasFieldsMeta
@@ -127,6 +127,6 @@ class MappingInterface(object):
     @abstractmethod
     def apply(self, blob):
         """
-        Apply the mapping to a blob.
+        Apply the mapping to an object.
 
         """

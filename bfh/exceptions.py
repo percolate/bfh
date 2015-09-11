@@ -11,8 +11,14 @@ __all__ = [
 
 
 class Invalid(TypeError):
-    pass
+    """
+    The value in this field is not valid.
+
+    """
 
 
 class Missing(KeyError, AttributeError):
-    pass
+    """
+    A thing that should be here... is not.
+
+    """

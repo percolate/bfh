@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+from bfh.version import VERSION
 
 setup(
     name='bfh',
-    version="0.1.2",
+    version=VERSION,
     description="Smacks schemas into other schemas",
     author="Evan Bender",
     install_requires=[

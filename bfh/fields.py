@@ -1,6 +1,8 @@
 """
 Fields that can go on Schemas
 
+Included are the common data types you'll probably need, and a generic `Field`
+class so you can implement your own if you want.
 """
 from __future__ import absolute_import
 
@@ -35,10 +37,21 @@ class Field(FieldInterface):
     """
     Base class for a field.
 
-    Inherit this and override self.serialize and self.validate as desired.
+    You can create custom fields if you inherit this and implement
+    `serialize` and `validate` as desired:
+
+        class AngryField(Field):
+            def serialize(self, value, **kwargs):
+                return "I HATE YOU"
+
+            def validate(self, value):
+                return False
+
     """
     def __init__(self, required=True):
         """
+        Initialize the field.
+
         Args:
             required (Bool) - is this a required field in the schema?
         """
@@ -53,9 +66,18 @@ class Field(FieldInterface):
         instance.__dict__[self.field_name] = value
 
     def serialize(self, value, **kwargs):
+        """
+        Transform the value into whatever shape you'd like it to appear in a
+        Python dict, ready for use in the outside world.
+
+        """
         return value
 
     def validate(self, value):
+        """
+        Is the value valid in this kind of field?
+
+        """
         if self.required and value is None:
             raise Invalid("%s: a value is required" % self.field_name)
         return True
@@ -73,12 +95,14 @@ class Subschema(Field):
     """
     A field that defines a subschema.
 
-    class Inner(Schema):
-        # some fields
+    Define one schema, then you can use this field to embed it in another:
 
-    class MySchema(Schema):
-        inner = Subschema(Inner)
-        # more fields
+        class Inner(Schema):
+            # some fields
+
+        class MySchema(Schema):
+            inner = Subschema(Inner)
+            # more fields
 
     """
     def __init__(self, subschema_class, *args, **kwargs):
@@ -92,6 +116,12 @@ class Subschema(Field):
             instance.__dict__[self.field_name] = value
 
     def serialize(self, value, implicit_nulls=True):
+        """
+        A Subschema serializes as a dict.
+
+        Kwargs:
+            implicit_nulls (bool): drop keys with falsey values
+        """
         if hasattr(value, "serialize"):
             value = value.serialize(implicit_nulls=implicit_nulls)
 
@@ -123,6 +153,7 @@ class SimpleTypeField(Field):
     """
     Base class for fields that simply validate a type.
 
+    Expects a class attribute 'field_type'.
     """
     def _valid(self, value):
         if value is None and not self.required:
@@ -139,22 +170,34 @@ class SimpleTypeField(Field):
 
 
 class BooleanField(SimpleTypeField):
+    """
+    A field that should contain a boolean.
 
+    """
     field_type = bool
 
 
 class IntegerField(SimpleTypeField):
+    """
+    A field that should contain an integer.
 
+    """
     field_type = int
 
 
 class NumberField(SimpleTypeField):
+    """
+    A field that should contain a floating-point number.
 
+    """
     field_type = float
 
 
 class DatetimeField(SimpleTypeField):
+    """
+    A field that should contain a Python datetime object.
 
+    """
     field_type = datetime
 
 
@@ -164,20 +207,24 @@ class UnicodeField(SimpleTypeField):
 
     Expect unicode. If it's not already unicode, assume it's utf-8 and
     transform it to unicode.
-
-    TODO specify optional encoding.
     """
     field_type = string_type
 
-    def __init__(self, strict=False, **kwargs):
+    def __init__(self, strict=False, encoding='utf-8', **kwargs):
+        """
+        Kwargs:
+            strict (bool): don't coerce a non-unicode string to unicode
+            encoding (str): default 'utf-8'
+        """
         super(UnicodeField, self).__init__(**kwargs)
         self.strict = strict
+        self.encoding = encoding
 
     def _coerce(self, value):
         if isinstance(value, string_type):
             return value
         try:
-            return value.decode('utf-8')
+            return value.decode(self.encoding)
         except AttributeError:
             raise Invalid("%s: %s is not a string" % (self.field_name, value))
 
@@ -194,7 +241,10 @@ class UnicodeField(SimpleTypeField):
 
 
 class IsoDateString(UnicodeField):
+    """
+    A string field that validates that it contains an ISO 8601 date string
 
+    """
     ISO_REGEX = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
     def validate(self, value):
@@ -210,9 +260,8 @@ class IsoDateString(UnicodeField):
 
 class ObjectField(SimpleTypeField):
     """
-    A field that can contain a dict or object.
+    A field that can contain a schemaless dict or object.
 
-    I.e. the lazy person's Subschema.
     """
     field_type = (dict, SchemaInterface)
 
@@ -223,6 +272,10 @@ class ObjectField(SimpleTypeField):
         return True
 
     def serialize(self, value, implicit_nulls=True):
+        """
+        Kwargs:
+            implicit_nulls (bool): drop keys with falsey values
+        """
         if hasattr(value, "serialize"):
             value = value.serialize(implicit_nulls=implicit_nulls)
 
@@ -240,7 +293,17 @@ class ArrayField(SimpleTypeField):
     """
     A field that can contain an array of things of type `array_type`
 
-    N.B. array_type is a class, not an instance
+        class Inner(Schema):
+             wow = IntegerField()
+
+        class MySchema(Schema):
+             ints = ArrayField(int)
+             inners = ArrayField(Inner)
+
+    indicates an object that looks like so:
+
+        {"ints": [1, 2, 3], "inners": [{"wow": 4}, {"wow": 5}]}
+
     """
     field_type = (list, tuple)
 
