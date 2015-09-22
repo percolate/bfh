@@ -27,6 +27,11 @@ class Schema1(Schema):
     another_str = UnicodeField()
 
 
+class DefaultsSchema(Schema):
+    not_defaulted = UnicodeField()
+    defaulted = UnicodeField(default="testing")
+
+
 class Schema2(Schema):
     peas = UnicodeField()
     carrots = IntegerField()
@@ -233,6 +238,10 @@ class TestSchemas(TestCase):
         m = Myschema(extras)
         self.assertEqual(extras, m._raw_input)
 
+    def test_schema_can_use_defaults(self):
+        s = DefaultsSchema(defaulted=None).serialize()
+        self.assertEqual(s.get("defaulted"), "testing")
+
 
 class TestGenericSchema(TestCase):
     def test_can_make_a_generic_schema_from_dict(self):
@@ -346,6 +355,38 @@ class TestMappings(TestCase):
         transformed = Mymap().apply(source)
         with self.assertRaises(Invalid):
             transformed.validate()
+
+        self.assertEqual({"cool": 1}, transformed.serialize())
+
+    def test_empty_fields_serialized_with_defaults(self):
+        class FirstSchema(Schema):
+            wow = IntegerField(required=True)
+            umm = IntegerField(required=False, default=2)
+
+        class OtherSchema(Schema):
+            cool = IntegerField(required=True)
+            bad = IntegerField(required=True)
+
+        class Mymap(Mapping):
+            source_schema = FirstSchema
+            target_schema = OtherSchema
+
+            cool = Get('wow')
+            bad = Get('umm')
+
+        source = FirstSchema(wow=1, umm=None)
+        assert source.validate()
+
+        transformed = Mymap().apply(source)
+
+        self.assertEqual({"cool": 1, "bad": 2}, transformed.serialize())
+
+#       test that explicit None is different from field not being present.
+
+        source = FirstSchema(wow=1)
+        assert source.validate()
+
+        transformed = Mymap().apply(source)
 
         self.assertEqual({"cool": 1}, transformed.serialize())
 

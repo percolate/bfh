@@ -48,7 +48,7 @@ class Field(FieldInterface):
                 return False
 
     """
-    def __init__(self, required=True):
+    def __init__(self, default=None, required=True):
         """
         Initialize the field.
 
@@ -56,6 +56,7 @@ class Field(FieldInterface):
             required (Bool) - is this a required field in the schema?
         """
         self.required = required
+        self.default = default
 
     def __get__(self, instance, cls=None):
         if instance is None:
@@ -63,7 +64,10 @@ class Field(FieldInterface):
         return instance.__dict__.get(self.field_name)
 
     def __set__(self, instance, value):
-        instance.__dict__[self.field_name] = value
+        if value is None and self.default:
+            instance.__dict__[self.field_name] = self.default
+        else:
+            instance.__dict__[self.field_name] = value
 
     def serialize(self, value, **kwargs):
         """
