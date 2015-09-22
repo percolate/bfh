@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.3
+
+- Documentation and cleanup
+
 ## 0.1.2
 
 - Fixes validation when IsoDateString is not a required field
