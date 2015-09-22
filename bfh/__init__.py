@@ -7,12 +7,16 @@ from __future__ import absolute_import
 from .common import nullish
 from .interfaces import SchemaInterface, MappingInterface
 
+from . import exceptions
 from . import fields
 from . import transformations
+
+from .version import __version__
 
 __all__ = [
     "Schema",
     "Mapping",
+    "exceptions",
     "fields",
     "transformations",
 ]
@@ -63,6 +67,9 @@ class Schema(SchemaInterface):
     def serialize(self, implicit_nulls=True):
         """
         Represent this schema as a dictionary.
+
+        Handy for dumping to json or some other further serialization format,
+        or splatting into an object constructor.
 
         Kwargs:
             implicit_nulls (Bool) - drop any keys whose value is nullish
@@ -149,6 +156,21 @@ class Mapping(MappingInterface):
             legs = Const(4)
             noise = Const('woof!')
 
+    The action happens when you get an instance of your mapping:
+
+        dog_to_animal_map = DogToAnimal()
+
+    Then apply it to an object. You get a Schema instance:
+
+        my_animal = dog_to_animal_map.apply(my_dog)
+        type(my_animal)
+        # __main__.Animal
+
+    ... which is full of values:
+
+        my_animal.serialize()
+        # {"name": "Fido", "type": "dog", "legs": 4, "noise": "woof!}
+
     """
     def apply(self, blob):
         """
@@ -158,7 +180,7 @@ class Mapping(MappingInterface):
             blob (dict or Schema) - the thing to transform
 
         Returns:
-            instance of `self.target_schema` if declared, or GenericSchema
+            instance of `self.target_schema` (if declared) or GenericSchema
         """
         if self.source_schema is None:
             loaded_source = blob

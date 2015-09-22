@@ -2,6 +2,8 @@
 
 A Python DSL for schema transformations
 
+Docs: http://percolate.github.io/bfh/
+
 ![bfh](http://timberframe-postandbeamhomes.com/media/uploads/galleries/trusses/naked_trusses/iain_with_beatle_hammer.jpg)
 
 Look, you can put square pegs in round holes:
