@@ -87,11 +87,8 @@ class Schema(SchemaInterface):
             if hasattr(field, "serialize"):
                 value = field.serialize(value, implicit_nulls=implicit_nulls)
 
-            is_nullish = nullish(value, implicit_nulls=implicit_nulls)
-
-            if is_nullish and field.default:
-                outd[name] = field.default
-            elif implicit_nulls and is_nullish:
+            if implicit_nulls and nullish(value,
+                                          implicit_nulls=implicit_nulls):
                 pass
             else:
                 outd[name] = value
