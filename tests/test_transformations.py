@@ -274,6 +274,28 @@ class TestSubmapping(TestCase):
         transformed = Outer().apply(source).serialize()
         self.assertEqual({"inner": {"goal": 3}}, transformed)
 
+    def test_submap_handles_bad_input_well(self):
+        class Inner(Mapping):
+            wow = Get('something')
+
+        class Outer(Mapping):
+            inner = Submapping(Inner, Get("inner"))
+
+        source_good = {
+            "inner": {"something": 1}
+        }
+        self.assertEqual({"inner": {"wow": 1}},
+                         Outer().apply(source_good).serialize())
+
+        empties = [
+            {"inner": {}},
+            {"inner": None},
+            {},
+            None,
+        ]
+        for source in empties:
+            self.assertEqual({}, Outer().apply(source).serialize())
+
 
 class TestIdempotence(TestCase):
     def test_idempotent(self):
