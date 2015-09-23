@@ -286,6 +286,26 @@ class TwoToOne(Mapping):
     another_str = Str(Get('beans'))
 
 
+def set_up_schemas(default=None):
+
+    class FirstSchema(Schema):
+        wow = IntegerField(required=True)
+        umm = IntegerField(required=False, default=default)
+
+    class OtherSchema(Schema):
+        cool = IntegerField(required=True)
+        bad = IntegerField(required=True)
+
+    class Mymap(Mapping):
+        source_schema = FirstSchema
+        target_schema = OtherSchema
+
+        cool = Get('wow')
+        bad = Get('umm')
+
+    return FirstSchema, OtherSchema, Mymap
+
+
 class TestMappings(TestCase):
     def setUp(self):
         self.original = {
@@ -334,62 +354,79 @@ class TestMappings(TestCase):
 
     def test_empty_fields_serialize_as_none_valid_or_no(self):
         """We aren't making assumptions here. Call validate if you want it."""
-        class FirstSchema(Schema):
-            wow = IntegerField(required=True)
-            umm = IntegerField(required=False)
-
-        class OtherSchema(Schema):
-            cool = IntegerField(required=True)
-            bad = IntegerField(required=True)  # Uh oh
-
-        class Mymap(Mapping):
-            source_schema = FirstSchema
-            target_schema = OtherSchema
-
-            cool = Get('wow')
-            bad = Get('umm')
-
-        source = FirstSchema(wow=1)
+        first_schema, other_schema, my_map = set_up_schemas()
+        source = first_schema(wow=1)
         assert source.validate()
 
-        transformed = Mymap().apply(source)
+        transformed = my_map().apply(source)
         with self.assertRaises(Invalid):
             transformed.validate()
 
         self.assertEqual({"cool": 1}, transformed.serialize())
 
     def test_empty_fields_serialized_with_defaults(self):
-        class FirstSchema(Schema):
-            wow = IntegerField(required=True)
-            umm = IntegerField(required=False, default=2)
+        first_schema, other_schema, my_map = set_up_schemas(2)
 
-        class OtherSchema(Schema):
-            cool = IntegerField(required=True)
-            bad = IntegerField(required=True)
-
-        class Mymap(Mapping):
-            source_schema = FirstSchema
-            target_schema = OtherSchema
-
-            cool = Get('wow')
-            bad = Get('umm')
-
-        source = FirstSchema(wow=1, umm=None)
+        source = first_schema(wow=1, umm=None)
         assert source.validate()
 
-        transformed = Mymap().apply(source)
+        transformed = my_map().apply(source)
 
         self.assertEqual({"cool": 1, "bad": 2}, transformed.serialize())
 
 #       test that explicit None is different from field not being present.
-
-        source = FirstSchema(wow=1)
+        source = first_schema(wow=1)
         assert source.validate()
 
-        transformed = Mymap().apply(source)
+        transformed = my_map().apply(source)
 
         self.assertEqual({"cool": 1}, transformed.serialize())
 
+    def test_invalid_default_throws_error(self):
+        first_schema, other_schema, my_map = set_up_schemas("bad_default")
+
+        source = first_schema(wow=1, umm=None)
+        with self.assertRaises(Invalid):
+            source.validate()
+
+    def test_callable_as_default(self):
+        def test_callable():
+            return 2
+
+        first_schema, other_schema, my_map = set_up_schemas(test_callable)
+
+        source = first_schema(wow=1, umm=None)
+        assert source.validate()
+
+        transformed = my_map().apply(source)
+        self.assertEqual({"cool": 1, "bad": 2}, transformed.serialize())
+
+        def test_false_callable():
+            return False
+
+        first_schema, other_schema, my_map = set_up_schemas(test_false_callable)
+
+        source = first_schema(wow=1, umm=None)
+        assert source.validate()
+
+        transformed = my_map().apply(source)
+        self.assertEqual({"cool": 1, "bad": False}, transformed.serialize())
+
+        source = first_schema(wow=1, umm=None)
+        assert source.validate()
+
+        transformed = my_map().apply(source)
+        self.assertEqual({"cool": 1, "bad": False}, transformed.serialize())
+
+    def test_bad_callable_throws_error(self):
+        # Testing callable that returns bad value
+        def test_bad_callable():
+            return "String :("
+
+        first_schema, other_schema, my_map = set_up_schemas(test_bad_callable)
+        source = first_schema(wow=1, umm=None)
+        with self.assertRaises(Invalid):
+            source.validate()
 
 class TestInheritance(TestCase):
     """Verify that the metaprogramming tricks didn't go awry"""
