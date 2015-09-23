@@ -275,10 +275,29 @@ class TestSubmapping(TestCase):
         self.assertEqual({"inner": {"goal": 3}}, transformed)
 
     def test_submap_handles_bad_input_well(self):
+
+        class SourceSub(Schema):
+            something = IntegerField(required=False)
+
+        class Source(Schema):
+            inner = Subschema(SourceSub, required=False)
+
+        class TargetSub(Schema):
+            wow = IntegerField(required=False)
+
+        class Target(Schema):
+            inner = Subschema(TargetSub, required=False)
+
         class Inner(Mapping):
+            source_schema = SourceSub
+            target_schema = TargetSub
+
             wow = Get('something')
 
         class Outer(Mapping):
+            source_schema = Source
+            target_schema = Target
+
             inner = Submapping(Inner, Get("inner"))
 
         source_good = {
