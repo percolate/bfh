@@ -71,7 +71,7 @@ class Field(FieldInterface):
         return instance.__dict__.get(self.field_name)
 
     def __set__(self, instance, value):
-        if value is None and self.default is not None:
+        if value is None:
             instance.__dict__[self.field_name] = get_default(self.default)
         else:
             instance.__dict__[self.field_name] = value
