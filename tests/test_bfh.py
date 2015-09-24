@@ -428,6 +428,23 @@ class TestMappings(TestCase):
         with self.assertRaises(Invalid):
             source.validate()
 
+    def test_callable_immutable(self):
+
+        def test_callable():
+            return {"wow": 1}
+
+        class Wow(Schema):
+            foo = UnicodeField(default=test_callable)
+
+        my1 = Wow(foo=None)
+        my2 = Wow(foo=None)
+
+        oops = my1.foo
+        oops["wow"] = 2
+
+        self.assertEqual(my2.foo, {"wow": 1})
+        self.assertEqual(my1.foo, {"wow": 2})
+
 class TestInheritance(TestCase):
     """Verify that the metaprogramming tricks didn't go awry"""
     def test_schemas_can_inherit(self):

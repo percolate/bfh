@@ -5,6 +5,7 @@ Included are the common data types you'll probably need, and a generic `Field`
 class so you can implement your own if you want.
 """
 from __future__ import absolute_import
+from copy import deepcopy
 
 import re
 from datetime import datetime
@@ -61,11 +62,12 @@ class Field(FieldInterface):
     def __get__(self, instance, cls=None):
         if instance is None:
             return self
+
         return instance.__dict__.get(self.field_name)
 
     def __set__(self, instance, value):
         if value is None:
-            instance.__dict__[self.field_name] = self._default
+            instance.__dict__[self.field_name] = self.default() if callable(self.default) else self.default
         else:
             instance.__dict__[self.field_name] = value
 
@@ -100,12 +102,7 @@ class Field(FieldInterface):
 
     @default.setter
     def default(self, value):
-        if callable(value):
-            default = value()
-        else:
-            default = value
-        self._default = default
-
+        self._default = value
 
 class Subschema(Field):
     """
