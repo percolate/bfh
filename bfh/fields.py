@@ -96,13 +96,6 @@ class Field(FieldInterface):
     def field_name(self, value):
         self._field_name = value
 
-    @property
-    def default(self):
-        return getattr(self, "_default", None)
-
-    @default.setter
-    def default(self, value):
-        self._default = value
 
 class Subschema(Field):
     """
