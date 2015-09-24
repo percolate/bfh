@@ -5,7 +5,6 @@ Included are the common data types you'll probably need, and a generic `Field`
 class so you can implement your own if you want.
 """
 from __future__ import absolute_import
-from copy import deepcopy
 
 import re
 from datetime import datetime
