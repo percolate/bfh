@@ -428,7 +428,7 @@ class TestMappings(TestCase):
         with self.assertRaises(Invalid):
             source.validate()
 
-    def test_callable_immutable(self):
+    def test_different_default_instance_per_schema_instance(self):
 
         def test_callable():
             return {"wow": 1}
