@@ -239,6 +239,8 @@ class TestSchemas(TestCase):
         self.assertEqual(extras, m._raw_input)
 
     def test_schema_can_use_defaults(self):
+        s = DefaultsSchema().serialize()
+        self.assertEqual(s.get("defaulted"), "testing")
         s = DefaultsSchema(defaulted=None).serialize()
         self.assertEqual(s.get("defaulted"), "testing")
 

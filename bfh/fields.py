@@ -67,7 +67,7 @@ class Field(FieldInterface):
             return self
 
         value = instance.__dict__.get(self.field_name)
-        if value:
+        if value is not None:
             return value
         else:
             default = get_default(self.default)
@@ -75,10 +75,7 @@ class Field(FieldInterface):
             return default
 
     def __set__(self, instance, value):
-        if value is None:
-            instance.__dict__[self.field_name] = get_default(self.default)
-        else:
-            instance.__dict__[self.field_name] = value
+        instance.__dict__[self.field_name] = value
 
     def serialize(self, value, **kwargs):
         """

@@ -79,8 +79,8 @@ class Schema(SchemaInterface):
         """
         outd = {}
         for name in self._field_names:
-            value = self.__dict__.get(name)
             field = self._fields.get(name)
+            value = getattr(self, name)
             if hasattr(value, "serialize"):
                 value = value.serialize(implicit_nulls=implicit_nulls)
 
