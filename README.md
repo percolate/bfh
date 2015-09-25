@@ -86,6 +86,6 @@ broken_peg.validate()
 
 ## Build Status
 
-[![Circle CI](https://circleci.com/gh/percolate/bfh.svg?style=svg)](https://circleci.com/gh/percolate/bfh)
+Tested on Python 2.7.10 and 3.5.0:
 
-Curretly failing on Py3k ...
+[![Circle CI](https://circleci.com/gh/percolate/bfh.svg?style=svg)](https://circleci.com/gh/percolate/bfh)
