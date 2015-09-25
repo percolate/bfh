@@ -124,7 +124,7 @@ class GenericSchema(Schema):
             as_dict (dict) - a blob from which to infer a schema
         """
         self.__dict__ = as_dict or {}
-        self._field_names = as_dict.keys() if as_dict else []
+        self._field_names.extend(as_dict.keys() if as_dict else [])
 
     def __getattr__(self, name):
         if name not in self._field_names:

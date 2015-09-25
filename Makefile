@@ -1,4 +1,4 @@
-.PHONY: requirements test dist doc clean
+.PHONY: requirements test dist doc clean coverage
 
 clean:
 	find . -name '*pyc' -delete
@@ -12,6 +12,9 @@ requirements:
 
 test:
 	python -m unittest discover tests/
+
+coverage:
+	py.test --cov=bfh --cov-report=term-missing tests/
 
 dist:
 	python setup.py bdist_wheel sdist

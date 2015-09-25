@@ -5,6 +5,7 @@ Interfaces for BFH
 from __future__ import absolute_import
 
 from abc import ABCMeta, abstractmethod, abstractproperty
+from six import add_metaclass
 
 __all__ = [
     "FieldInterface",
@@ -14,13 +15,12 @@ __all__ = [
 ]
 
 
+@add_metaclass(ABCMeta)
 class FieldInterface(object):
     """
     Descriptor that defines a field on a Schema class.
 
     """
-    __metaclass__ = ABCMeta
-
     @abstractmethod
     def validate(self):
         """
@@ -36,13 +36,12 @@ class FieldInterface(object):
         """
 
 
+@add_metaclass(ABCMeta)
 class TransformationInterface(object):
     """
     Descriptor that defines a field transformation on a Mapping class.
 
     """
-    __metaclass__ = ABCMeta
-
     @abstractmethod
     def function(self, whole_obj, *call_args, **kwargs):
         """
@@ -74,13 +73,12 @@ class HasFieldsMeta(ABCMeta):
         return new_class
 
 
+@add_metaclass(HasFieldsMeta)
 class SchemaInterface(object):
     """
     Interface for a Schema class.
 
     """
-    __metaclass__ = HasFieldsMeta
-
     @abstractmethod
     def validate(self):
         """
@@ -103,13 +101,12 @@ class SchemaInterface(object):
         """
 
 
+@add_metaclass(HasFieldsMeta)
 class MappingInterface(object):
     """
     Interface for a Mapping class.
 
     """
-    __metaclass__ = HasFieldsMeta
-
     @property
     def source_schema(self):
         """

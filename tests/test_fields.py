@@ -3,6 +3,8 @@ from unittest import TestCase
 
 import datetime
 
+import six
+
 from bfh import Schema
 from bfh.exceptions import Invalid
 from bfh.fields import (
@@ -72,8 +74,9 @@ class TestFieldValidation(TestCase):
 
         assert field.validate(u'nice snowman ☃')
 
-        with self.assertRaises(Invalid):
-            field.validate('not strict enough')
+        if six.PY2:
+            with self.assertRaises(Invalid):
+                field.validate('not strict enough')
 
     def test_array_validation(self):
         field = ArrayField(int)

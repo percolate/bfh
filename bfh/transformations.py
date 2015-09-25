@@ -345,7 +345,7 @@ class ParseDate(Transformation):
         value = call_args[0]
         if isinstance(value, int):
             date = datetime.utcfromtimestamp(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, string_type):
             date = parse_date(value)
         else:
             raise TypeError("Could not parse %s" % value)
