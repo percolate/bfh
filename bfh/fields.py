@@ -33,6 +33,10 @@ __all__ = [
 ]
 
 
+def get_default(value):
+    return value() if callable(value) else value
+
+
 class Field(FieldInterface):
     """
     Base class for a field.
@@ -62,11 +66,17 @@ class Field(FieldInterface):
         if instance is None:
             return self
 
-        return instance.__dict__.get(self.field_name)
+        value = instance.__dict__.get(self.field_name)
+        if value:
+            return value
+        else:
+            default = get_default(self.default)
+            instance.__dict__[self.field_name] = default
+            return default
 
     def __set__(self, instance, value):
         if value is None:
-            instance.__dict__[self.field_name] = self.default() if callable(self.default) else self.default
+            instance.__dict__[self.field_name] = get_default(self.default)
         else:
             instance.__dict__[self.field_name] = value
 
@@ -95,6 +105,13 @@ class Field(FieldInterface):
     def field_name(self, value):
         self._field_name = value
 
+    @property
+    def default(self):
+        return getattr(self, "_default", None)
+
+    @default.setter
+    def default(self, value):
+        self._default = value
 
 class Subschema(Field):
     """

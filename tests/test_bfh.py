@@ -374,17 +374,32 @@ class TestMappings(TestCase):
 
         self.assertEqual({"cool": 1, "bad": 2}, transformed.serialize())
 
-#       test that explicit None is different from field not being present.
+#       Note, if there is a default, it will serialize
         source = first_schema(wow=1)
         assert source.validate()
 
         transformed = my_map().apply(source)
 
-        self.assertEqual({"cool": 1}, transformed.serialize())
+        self.assertEqual({"cool": 1, "bad": 2}, transformed.serialize())
+
+        #No default, won't.
+        source = first_schema()
+
+        transformed = my_map().apply(source)
+
+        self.assertEqual({"bad": 2}, transformed.serialize())
 
     def test_invalid_default_throws_error(self):
         first_schema, other_schema, my_map = set_up_schemas("bad_default")
 
+        source = first_schema(wow=1, umm=None)
+        with self.assertRaises(Invalid):
+            source.validate()
+
+        def test_bad_callable():
+            return "String :("
+
+        first_schema, other_schema, my_map = set_up_schemas(test_bad_callable)
         source = first_schema(wow=1, umm=None)
         with self.assertRaises(Invalid):
             source.validate()
@@ -412,23 +427,7 @@ class TestMappings(TestCase):
         transformed = my_map().apply(source)
         self.assertEqual({"cool": 1, "bad": False}, transformed.serialize())
 
-        source = first_schema(wow=1, umm=None)
-        assert source.validate()
-
-        transformed = my_map().apply(source)
-        self.assertEqual({"cool": 1, "bad": False}, transformed.serialize())
-
-    def test_bad_callable_throws_error(self):
-        # Testing callable that returns bad value
-        def test_bad_callable():
-            return "String :("
-
-        first_schema, other_schema, my_map = set_up_schemas(test_bad_callable)
-        source = first_schema(wow=1, umm=None)
-        with self.assertRaises(Invalid):
-            source.validate()
-
-    def test_different_default_instance_per_schema_instance(self):
+    def test_default_interface(self):
 
         def test_callable():
             return {"wow": 1}
@@ -436,14 +435,26 @@ class TestMappings(TestCase):
         class Wow(Schema):
             foo = UnicodeField(default=test_callable)
 
-        my1 = Wow(foo=None)
-        my2 = Wow(foo=None)
+        wow = Wow()
+        self.assertEqual(wow.foo, {"wow": 1})
 
-        oops = my1.foo
-        oops["wow"] = 2
+        wow1 = Wow(foo={"zip": "pow"})
+        self.assertEqual(wow1.foo, {"zip": "pow"})
+
+        wow1.foo = None
+        self.assertEqual(wow1.foo, {"wow": 1})
+
+        wow2 = Wow(foo=None)
+        self.assertEqual(wow2.foo, {"wow": 1})
+
+        my1 = Wow()
+        my2 = Wow()
+
+        my1.foo["wow"] = 2
 
         self.assertEqual(my2.foo, {"wow": 1})
         self.assertEqual(my1.foo, {"wow": 2})
+
 
 class TestInheritance(TestCase):
     """Verify that the metaprogramming tricks didn't go awry"""
