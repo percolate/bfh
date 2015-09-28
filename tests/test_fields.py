@@ -326,3 +326,69 @@ class TestFieldSerialization(TestCase):
         assert field.serialize(u'nice snowman ☃')
 
         assert field.serialize('not strict enough')
+
+
+class TestDefaultValuesForField(TestCase):
+
+    def set_up_schema(self, default):
+        class FirstSchema(Schema):
+            foo = UnicodeField(required=False, default=default)
+        return FirstSchema
+
+    def test_default_interface(self):
+
+        def test_callable():
+            return {"wow": 1}
+
+        schema = self.set_up_schema(test_callable)
+
+        wow = schema()
+        self.assertEqual(wow.foo, {"wow": 1})
+
+        wow1 = schema(foo={"zip": "pow"})
+        self.assertEqual(wow1.foo, {"zip": "pow"})
+
+        wow1.foo = None
+        self.assertEqual(wow1.foo, {"wow": 1})
+
+        wow2 = schema(foo=None)
+        self.assertEqual(wow2.foo, {"wow": 1})
+
+        my1 = schema()
+        my2 = schema()
+
+        my1.foo["wow"] = 2
+
+        self.assertEqual(my2.foo, {"wow": 1})
+        self.assertEqual(my1.foo, {"wow": 2})
+
+    def test_empty_fields_serialized_with_defaults(self):
+
+        first_schema = self.set_up_schema("testing")
+        source = first_schema()
+        assert source.validate()
+
+        # Note, if there is a default, it will serialize
+        self.assertEqual({"foo": "testing"}, source.serialize())
+
+        # No default, won't.
+        second_schema = self.set_up_schema(None)
+        second_source = second_schema()
+
+        self.assertEqual({}, second_source.serialize())
+
+    def test_callable_as_default(self):
+
+        def test_callable():
+            return "testing"
+
+        first_schema = self.set_up_schema(test_callable)
+        source = first_schema()
+        self.assertEqual({"foo": "testing"}, source.serialize())
+
+        def test_false_callable():
+            return False
+
+        second_schema = self.set_up_schema(test_false_callable)
+        second_source = second_schema()
+        self.assertEqual({"foo": False}, second_source.serialize())

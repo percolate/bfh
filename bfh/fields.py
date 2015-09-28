@@ -33,10 +33,6 @@ __all__ = [
 ]
 
 
-def get_default(value):
-    return value() if callable(value) else value
-
-
 class Field(FieldInterface):
     """
     Base class for a field.
@@ -70,7 +66,7 @@ class Field(FieldInterface):
         if value is not None:
             return value
         else:
-            default = get_default(self.default)
+            default = self.default
             instance.__dict__[self.field_name] = default
             return default
 
@@ -104,7 +100,7 @@ class Field(FieldInterface):
 
     @property
     def default(self):
-        return getattr(self, "_default", None)
+        return self._default() if callable(self._default) else self._default
 
     @default.setter
     def default(self, value):
