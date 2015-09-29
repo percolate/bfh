@@ -288,13 +288,6 @@ class TwoToOne(Mapping):
     another_str = Str(Get('beans'))
 
 
-def set_up_schemas(default=None):
-
-
-
-    return FirstSchema, OtherSchema, Mymap
-
-
 class TestMappings(TestCase):
     def setUp(self):
         self.original = {
