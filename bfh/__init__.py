@@ -113,23 +113,44 @@ class Schema(SchemaInterface):
         return all(nullish(v) for v in self.__dict__.values())
 
 
-class GenericSchema(Schema):
+class GenericSchema(SchemaInterface):
     """
     A generic schema to use when none is specified.
 
     """
-    def __init__(self, as_dict=None):
+    def __init__(self, **kwargs):
         """
         Args:
             as_dict (dict) - a blob from which to infer a schema
         """
-        self.__dict__ = as_dict or {}
-        self._field_names.extend(as_dict.keys() if as_dict else [])
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def __getattr__(self, name):
-        if name not in self._field_names:
-            return None
-        return self.__dict__[name]
+        return self.__dict__.get(name)
+
+    def serialize(self, implicit_nulls=True):
+        """
+        Represent generic schema as a dictionary.
+
+        Kwargs:
+            implicit_nulls (Bool) - drop any keys whose value is nullish
+
+        Returns:
+            dict
+        """
+        outd = {}
+        for name, value in self.__dict__.items():
+            if hasattr(value, "serialize"):
+                value = value.serialize(implicit_nulls=implicit_nulls)
+
+            if implicit_nulls and nullish(value,
+                                          implicit_nulls=implicit_nulls):
+                pass
+            else:
+                outd[name] = value
+
+        return outd
 
     def validate(self):
         """
@@ -137,6 +158,10 @@ class GenericSchema(Schema):
 
         """
         return True
+
+    @property
+    def is_empty(self):
+        return all(nullish(v) for v in self.__dict__.values())
 
 
 class Mapping(MappingInterface):
@@ -197,6 +222,6 @@ class Mapping(MappingInterface):
             target_dict[attr_name] = result
 
         if self.target_schema is None:
-            return GenericSchema(target_dict)
+            return GenericSchema(**target_dict)
 
         return self.target_schema(**target_dict)

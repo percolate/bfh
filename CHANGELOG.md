@@ -3,6 +3,7 @@
 ## 0.2.0
 
 - Python 3 compatibility
+- Defaults on Fields
 
 ## 0.1.4
 

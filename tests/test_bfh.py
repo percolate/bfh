@@ -247,7 +247,7 @@ class TestSchemas(TestCase):
 
 class TestGenericSchema(TestCase):
     def test_can_make_a_generic_schema_from_dict(self):
-        generic = GenericSchema({"foo": 1, "bar": 2, "baz": [3, 4, 5]})
+        generic = GenericSchema(**{"foo": 1, "bar": 2, "baz": [3, 4, 5]})
         self.assertEqual(generic.foo, 1)
         self.assertEqual(generic.bar, 2)
         self.assertEqual(generic.baz, [3, 4, 5])
@@ -264,8 +264,13 @@ class TestGenericSchema(TestCase):
     def test_generic_is_always_valid(self):
         generic1 = GenericSchema()
         assert generic1.validate()
-        generic2 = GenericSchema({"foo": {}, "bar": "great"})
+        generic2 = GenericSchema(**{"foo": {}, "bar": "great"})
         assert generic2.validate()
+
+    def test_can_serialize_generic(self):
+        source = {"foo": 1, "bar": 2, "baz": [3, 4, 5]}
+        generic = GenericSchema(**source)
+        self.assertEqual(source, generic.serialize())
 
 
 class OneToTwoBase(Mapping):
