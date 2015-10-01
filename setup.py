@@ -11,6 +11,7 @@ setup(
     author="Evan Bender",
     install_requires=[
         "python-dateutil",
+        "six",
     ],
     author_email="evan.bender@percolate.com",
     url="https://github.com/percolate/bfh",

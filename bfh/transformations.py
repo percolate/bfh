@@ -17,16 +17,18 @@ filter that object into the form of the output schema.
 from __future__ import absolute_import
 
 from datetime import datetime
+
 from dateutil.parser import parse as parse_date
+import six
 
 from .common import utc
 from .exceptions import Missing
 from .interfaces import TransformationInterface
 
 try:
-    string_type = unicode
+    unicode_type = unicode
 except NameError:
-    string_type = str
+    unicode_type = str
 
 __all__ = [
     "All",
@@ -284,7 +286,7 @@ class Str(CoerceType):
     Coerce input to a unicode string
 
     """
-    target_type = string_type
+    target_type = unicode_type
 
     null_types = (None, "")
 
@@ -345,7 +347,7 @@ class ParseDate(Transformation):
         value = call_args[0]
         if isinstance(value, int):
             date = datetime.utcfromtimestamp(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, six.string_types):
             date = parse_date(value)
         else:
             raise TypeError("Could not parse %s" % value)

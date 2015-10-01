@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.0
+
+- Python 3 compatibility
+
 ## 0.1.4
 
 - Bugfix: Typeerror on null submapping
