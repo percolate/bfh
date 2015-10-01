@@ -274,6 +274,59 @@ class TestSubmapping(TestCase):
         transformed = Outer().apply(source).serialize()
         self.assertEqual({"inner": {"goal": 3}}, transformed)
 
+    def test_submap_handles_bad_input_well(self):
+        """Submapping should handle nullish inputs well"""
+
+        # With explicit source and target schemas
+        class SourceSub(Schema):
+            something = IntegerField(required=False)
+
+        class Source(Schema):
+            inner = Subschema(SourceSub, required=False)
+
+        class TargetSub(Schema):
+            wow = IntegerField(required=False)
+
+        class Target(Schema):
+            inner = Subschema(TargetSub, required=False)
+
+        class Inner(Mapping):
+            source_schema = SourceSub
+            target_schema = TargetSub
+
+            wow = Get('something')
+
+        class Outer(Mapping):
+            source_schema = Source
+            target_schema = Target
+
+            inner = Submapping(Inner, Get("inner"))
+
+        # With implicit source and target schemas
+        class InnerNoschema(Mapping):
+            wow = Get('something')
+
+        class OuterNoschema(Mapping):
+            inner = Submapping(InnerNoschema, Get("inner"))
+
+        source_good = {
+            "inner": {"something": 1}
+        }
+        self.assertEqual({"inner": {"wow": 1}},
+                         Outer().apply(source_good).serialize())
+        self.assertEqual({"inner": {"wow": 1}},
+                         OuterNoschema().apply(source_good).serialize())
+
+        empties = [
+            {"inner": {}},
+            {"inner": None},
+            {},
+            None,
+        ]
+        for source in empties:
+            self.assertEqual({}, Outer().apply(source).serialize())
+            self.assertEqual({}, OuterNoschema().apply(source).serialize())
+
 
 class TestIdempotence(TestCase):
     def test_idempotent(self):

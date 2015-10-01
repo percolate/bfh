@@ -187,7 +187,7 @@ class Mapping(MappingInterface):
         elif isinstance(blob, self.source_schema):
             loaded_source = blob
         else:
-            loaded_source = self.source_schema(**blob)
+            loaded_source = self.source_schema(**blob or {})
 
         all_attrs = self._fields.keys()
         target_dict = {}

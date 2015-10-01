@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.4
+
+- Bugfix: Typeerror on null submapping
+
 ## 0.1.3
 
 - Documentation and cleanup
