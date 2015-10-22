@@ -12,6 +12,7 @@ from bfh.fields import (
 from bfh.transformations import (
     All,
     Bool,
+    Chain,
     Const,
     Concat,
     DateToIsoString,
@@ -173,6 +174,35 @@ class TestDo(TestCase):
         transform = lambda a, b, c: a + b + c
         result = Do(transform, 1, 2, 3)()
         self.assertEqual(6, result)
+
+
+class TestChain(TestCase):
+    def test_can_chain_lists(self):
+        list_one = [1, 2]
+        list_two = [3, 4, 5]
+        list_three = [6, 7]
+        result = Chain(list_one, list_two, list_three)()
+        self.assertEqual(result, [1, 2, 3, 4, 5, 6, 7])
+
+    def test_can_chain_tuples(self):
+        tuple_one = (1, 2)
+        tuple_two = (3, 4)
+        tuple_three = (5, 6)
+        result = Chain(tuple_one, tuple_two, tuple_three)()
+        self.assertEqual([1, 2, 3, 4, 5, 6], result)
+
+    def test_can_chain_lists_and_tuples(self):
+        list_one = [1, 2, 3]
+        tuple_one = (4, 5)
+        tuple_two = (6, 7)
+        result = Chain(list_one, tuple_one, tuple_two)()
+        self.assertEqual([1, 2, 3, 4, 5, 6, 7], result)
+
+    def test_retains_nesting(self):
+        list_one = [1, 2, 3]
+        list_two = [4, [5]]
+        result = Chain(list_one, list_two)()
+        self.assertEqual([1, 2, 3, 4, [5]], result)
 
 
 class TestMixedTransformations(TestCase):
