@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.0
+
+- Syntax sugar to allow reserved words in schema.
+
 ## 0.2.0
 
 - Python 3 compatibility

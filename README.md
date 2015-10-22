@@ -84,6 +84,28 @@ broken_peg.validate()
 
 ```
 
+
+## Reserved Words
+
+Obviously your schema needs a field called 'if' or 'finally'. Use a double-underscore name and all will be well:
+
+    class Fancy(Schema):
+        # if = IntegerField()  # Ouch! SyntaxError!
+        __if = IntegerField()
+
+
+You can init in any of these ways:
+
+    Fancy(__if=1)
+    Fancy(**{"__if": 1})
+    Fancy(**{"if": 1})
+
+
+In a mapping, use the de-dundered name
+
+    Get("if")
+
+
 ## Build Status
 
 Tested on Python 2.7.10 and 3.5.0:

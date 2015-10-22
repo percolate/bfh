@@ -4,3 +4,8 @@ __pycache__
 /doc/html/
 /build/
 /dist/
+/.cache/
+/.coverage
+/.tox/
+/venv2/
+/venv3/
