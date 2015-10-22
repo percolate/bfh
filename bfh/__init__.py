@@ -236,11 +236,3 @@ class Mapping(MappingInterface):
             return GenericSchema(**target_dict)
 
         return self.target_schema(**target_dict)
-
-    # def __setattr__(self, name, value):
-    #     name = dedunder(name)
-    #     object.__setattr__(self, name, value)
-
-    # def __getattr__(self, name):
-    #     name = dedunder(name)
-    #     return object.__getattribute__(self, name)

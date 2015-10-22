@@ -52,13 +52,6 @@ class TransformationInterface(object):
         """
 
 
-# def dedunder(classname, name):
-#     prefix = "_%s__" % classname
-#     if name.startswith(prefix):
-#         return name[len(prefix):]
-#     return name
-
-
 class HasFieldsMeta(ABCMeta):
     """
     Metaclass for classes that may have fields.
