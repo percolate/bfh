@@ -4,18 +4,40 @@ Utility functions for BFH
 """
 from __future__ import absolute_import
 
+import re
 from datetime import timedelta, tzinfo
 
 __all__ = [
     "NULLISH",
+    "dedunder",
     "nullish",
     "utc",
 ]
 
-"""
-Types that are falsey, but not False itself.
 
-"""
+DUNDER_MATCH = re.compile(r'_.+?__')  # python's privacy prefix "_Foo__"
+
+
+def dedunder(name):
+    """
+    HORROR, SHAME, GASP.
+
+    Subvert Python's very prudent double-underscore privacy mechanism.
+
+    "_Foo__my_attr" -> "my_attr"
+
+    Args:
+        name (str): a name that may or may not have the prefix
+
+    Returns:
+        the name stripped of the privacy prefix, if it had one.
+    """
+    if DUNDER_MATCH.match(name):
+        return DUNDER_MATCH.sub('', name)
+    return name
+
+
+# Types that are falsey, but not False itself.
 NULLISH = (None, {}, [], tuple())
 
 

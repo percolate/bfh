@@ -7,6 +7,8 @@ from __future__ import absolute_import
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import add_metaclass
 
+from .common import dedunder
+
 __all__ = [
     "FieldInterface",
     "MappingInterface",
@@ -55,9 +57,9 @@ class HasFieldsMeta(ABCMeta):
     Metaclass for classes that may have fields.
 
     """
-    def __new__(metaclass, name, bases, attributes, *args, **kwargs):
+    def __new__(metaclass, classname, bases, attributes, *args, **kwargs):
         new_class = super(HasFieldsMeta, metaclass).__new__(
-            metaclass, name, bases, attributes, *args, **kwargs
+            metaclass, classname, bases, attributes, *args, **kwargs
         )
         setattr(new_class, '_fields', {})
         setattr(new_class, '_field_names', [])
@@ -67,6 +69,7 @@ class HasFieldsMeta(ABCMeta):
             if not isinstance(attribute,
                               (FieldInterface, TransformationInterface)):
                 continue
+            name = dedunder(name)
             new_class._fields[name] = attribute
             new_class._field_names.append(name)
             attribute.field_name = name
