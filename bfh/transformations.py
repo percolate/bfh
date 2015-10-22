@@ -21,6 +21,8 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 import six
 
+from itertools import chain
+
 from .common import utc
 from .exceptions import Missing
 from .interfaces import TransformationInterface
@@ -330,6 +332,12 @@ class Do(Transformation):
     """
     def function(self, source, *call_args):  # source ignored
         return call_args[0](*call_args[1:])
+
+
+class Chain(Transformation):
+    """Chain an arbitrary number of iterables."""
+    def function(self, source, *call_args):
+        return list(chain(*call_args))
 
 
 class ParseDate(Transformation):
