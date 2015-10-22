@@ -4,7 +4,7 @@ BFH: a library for mapping schemas to other schemas.
 """
 from __future__ import absolute_import
 
-from .common import nullish
+from .common import nullish, dedunder
 from .interfaces import SchemaInterface, MappingInterface
 
 from . import exceptions
@@ -61,8 +61,19 @@ class Schema(SchemaInterface):
 
         # init values passed as kwargs
         for k, v in kwargs.items():
-            if hasattr(self, k):
+            if k.startswith("__"):
+                k = k.strip("_")
+
+            if k in self._field_names:
                 setattr(self, k, v)
+
+    def __setattr__(self, name, value):
+        name = dedunder(name)
+        object.__setattr__(self, name, value)
+
+    def __getattr__(self, name):
+        name = dedunder(name)
+        return object.__getattribute__(self, name)
 
     def serialize(self, implicit_nulls=True):
         """
@@ -217,7 +228,7 @@ class Mapping(MappingInterface):
         all_attrs = self._fields.keys()
         target_dict = {}
         for attr_name in all_attrs:
-            transform = getattr(self, attr_name)
+            transform = self._fields[attr_name]
             result = transform(loaded_source)
             target_dict[attr_name] = result
 
@@ -225,3 +236,11 @@ class Mapping(MappingInterface):
             return GenericSchema(**target_dict)
 
         return self.target_schema(**target_dict)
+
+    # def __setattr__(self, name, value):
+    #     name = dedunder(name)
+    #     object.__setattr__(self, name, value)
+
+    # def __getattr__(self, name):
+    #     name = dedunder(name)
+    #     return object.__getattribute__(self, name)

@@ -245,6 +245,63 @@ class TestSchemas(TestCase):
         self.assertEqual(s.get("defaulted"), "testing")
 
 
+class TestReservedWords(TestCase):
+    def test_can_dunder_reserved_words(self):
+        class Fancy(Schema):
+            # if = IntegerField()  # Ouch! SyntaxError!
+            __if = IntegerField()
+
+        # can init with dunder kwarg arg
+        s = Fancy(__if=1)
+        assert hasattr(s, '_Fancy__if')
+        assert hasattr(s, 'if')
+        assert s.serialize() == {"if": 1}
+
+        # can init with non-dunder splat kwarg
+        d2 = {"if": 2}
+        s2 = Fancy(**d2)
+        assert s2.serialize() == d2
+
+        # or dunder splat kwarg
+        d3 = {"__if": 3}
+        s3 = Fancy(**d3)
+        assert s3.serialize() == {"if": 3}  # magic!
+
+        # or straight assignment
+        s4 = Fancy()
+        s4.__if = 4
+        assert s4.__if == 4
+        assert s4.serialize() == {"if": 4}
+
+    def test_can_get_dunder(self):
+        class In(Schema):
+            __finally = UnicodeField()
+
+        class Out(Schema):
+            wow = UnicodeField()
+
+        class Whoa(Schema):
+            __lambda = UnicodeField()
+
+        class InToOut(Mapping):
+            source_schema = In
+            target_schema = Out
+
+            wow = Get("finally")
+
+        class InToWhoa(Mapping):
+            source_schema = In
+            target_schema = Whoa
+
+            __lambda = Get("finally")
+
+        result = InToOut().apply({"finally": "it is here"})
+        self.assertEqual(result.serialize(), {"wow": "it is here"})
+
+        result = InToWhoa().apply({"finally": "it is here"})
+        self.assertEqual(result.serialize(), {"lambda": "it is here"})
+
+
 class TestGenericSchema(TestCase):
     def test_can_make_a_generic_schema_from_dict(self):
         generic = GenericSchema(**{"foo": 1, "bar": 2, "baz": [3, 4, 5]})

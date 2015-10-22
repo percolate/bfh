@@ -4,6 +4,7 @@ Utility functions for BFH
 """
 from __future__ import absolute_import
 
+import re
 from datetime import timedelta, tzinfo
 
 __all__ = [
@@ -51,3 +52,12 @@ class UTC(tzinfo):
         return self.OFFSET
 
 utc = UTC()
+
+
+DUNDER_MATCH = re.compile(r'_.+?__')
+
+
+def dedunder(name):
+    if DUNDER_MATCH.match(name):
+        return DUNDER_MATCH.sub('', name)
+    return name
