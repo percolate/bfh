@@ -187,6 +187,7 @@ class TestFieldValidation(TestCase):
 
         assert field.validate(SomeSchema())
 
+        # BREAKING TEST
         assert field.validate(SomeSchema(inner=None))
 
         with self.assertRaises(Invalid):
@@ -213,9 +214,11 @@ class TestFieldValidation(TestCase):
         empty = Outer(maybe=None)
         assert empty.validate()
 
+        # BREAKING TEST
         inner_empty = Outer(maybe=Inner(maybe=None))
         assert inner_empty.validate()
 
+        # BREAKING TEST
         innermost = Outer(maybe=Inner(maybe=MostIn(foo=None)))
         assert innermost.validate()
 
