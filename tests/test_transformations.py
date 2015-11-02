@@ -288,58 +288,6 @@ class TestSubmapping(TestCase):
         transformed = OuterWithSourceTarget().apply(source).serialize()
         self.assertEqual({"inner": {"goal": 1}}, transformed)
 
-    def test_submap_with_schema(self):
-        source = {
-            "flat": 1,
-            "nice": 2
-        }
-
-        class Source(Schema):
-            flat = IntegerField()
-            nice = IntegerField()
-
-        class TargetInner(Schema):
-            goal = IntegerField()
-
-        class Target(Schema):
-            inner = Subschema(TargetInner)
-
-        class Inner(Mapping):
-            source_schema = Target
-            # target_schema = TargetInner
-            goal = Get("flat")
-
-        class Outer(Mapping):
-            source_schema = Source
-            target_schema = Target
-            inner = Submapping(Inner, All())
-
-        transformed = Outer().apply(source).serialize()
-        self.assertEqual({"inner": {"goal": 1}}, transformed)
-
-        class OuterWithSourceTarget(Outer):
-            source_schema = Source
-            target_schema = Target
-
-        transformed = OuterWithSourceTarget().apply(source).serialize()
-        self.assertEqual({"inner": {"goal": 1}}, transformed)
-
-    def test_can_pass_part_to_submap(self):
-        source = {
-            "nested": {
-                "okay": 3
-            }
-        }
-
-        class Inner(Mapping):
-            goal = Get("okay")
-
-        class Outer(Mapping):
-            inner = Submapping(Inner, Get("nested"))
-
-        transformed = Outer().apply(source).serialize()
-        self.assertEqual({"inner": {"goal": 3}}, transformed)
-
     def test_submap_handles_bad_input_well(self):
         """Submapping should handle nullish inputs well"""
 

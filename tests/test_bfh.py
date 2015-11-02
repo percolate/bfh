@@ -244,6 +244,15 @@ class TestSchemas(TestCase):
         s = DefaultsSchema(defaulted=None).serialize()
         self.assertEqual(s.get("defaulted"), "testing")
 
+    def test_schema_class_attribs_not_set(self):
+        class Myschema(Schema):
+            wow = IntegerField()
+
+        m = Myschema(wow=1)
+        self.assertEqual({"wow": 1}, m._raw_input)
+        self.assertEqual({}, Myschema._raw_input)
+
+
 
 class TestReservedWords(TestCase):
     def test_can_dunder_reserved_words(self):

@@ -52,7 +52,7 @@ class Schema(SchemaInterface):
 
         # stash raw kwargs for downstream
         # since this is set in metaclass, hidden from __dict__
-        self._raw_input.update(kwargs)
+        self._raw_input = kwargs
 
         # init any subschemas
         for k, v in self._fields.items():
