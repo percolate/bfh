@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.4.1
+
+- Bugfix: state was incorrectly being stored on schema class rather
+  than instances
+
+## 0.4.0
+
+- Add Chain transformation
+
 ## 0.3.0
 
 - Syntax sugar to allow reserved words in schema.
