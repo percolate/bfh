@@ -63,7 +63,6 @@ class HasFieldsMeta(ABCMeta):
         )
         setattr(new_class, '_fields', {})
         setattr(new_class, '_field_names', [])
-        setattr(new_class, '_raw_input', {})
         for name in dir(new_class):
             attribute = getattr(new_class, name)
             if not isinstance(attribute,

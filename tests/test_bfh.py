@@ -248,9 +248,10 @@ class TestSchemas(TestCase):
         class Myschema(Schema):
             wow = IntegerField()
 
-        m = Myschema(wow=1)
-        self.assertEqual({"wow": 1}, m._raw_input)
-        self.assertEqual({}, Myschema._raw_input)
+        a = Myschema(wow=1)
+        b = Myschema()
+        self.assertEqual({"wow": 1}, a._raw_input)
+        self.assertEqual({}, b._raw_input)
 
 
 class TestReservedWords(TestCase):
