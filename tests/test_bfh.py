@@ -253,7 +253,6 @@ class TestSchemas(TestCase):
         self.assertEqual({}, Myschema._raw_input)
 
 
-
 class TestReservedWords(TestCase):
     def test_can_dunder_reserved_words(self):
         class Fancy(Schema):
