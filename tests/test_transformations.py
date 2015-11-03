@@ -41,6 +41,8 @@ class TestAll(TestCase):
 
         extras = {"wow": 1, "other": 2}
         m = Myschema(extras)
+
+        # by default extra keys are passed through
         allof = All()(m)
         self.assertEqual(extras, allof)
 
@@ -52,6 +54,18 @@ class TestAll(TestCase):
         # get filtered out.
         filtered = All(strict=True)(m)
         self.assertEqual({"wow": 1}, filtered)
+
+    def test_no_bad_implementation(self):
+        """Don't leak state"""
+        class Myschema(Schema):
+            wow = IntegerField()
+
+        first = {"wow": 1, "other": 2}
+        m = Myschema(first)
+        m2 = Myschema()
+
+        self.assertEqual(first, All()(m))
+        self.assertEqual({}, All()(m2))
 
 
 class TestGet(TestCase):
