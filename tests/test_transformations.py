@@ -41,6 +41,8 @@ class TestAll(TestCase):
 
         extras = {"wow": 1, "other": 2}
         m = Myschema(extras)
+
+        # by default extra keys are passed through
         allof = All()(m)
         self.assertEqual(extras, allof)
 
@@ -52,6 +54,18 @@ class TestAll(TestCase):
         # get filtered out.
         filtered = All(strict=True)(m)
         self.assertEqual({"wow": 1}, filtered)
+
+    def test_no_bad_implementation(self):
+        """Don't leak state"""
+        class Myschema(Schema):
+            wow = IntegerField()
+
+        first = {"wow": 1, "other": 2}
+        m = Myschema(first)
+        m2 = Myschema()
+
+        self.assertEqual(first, All()(m))
+        self.assertEqual({}, All()(m2))
 
 
 class TestGet(TestCase):
@@ -299,6 +313,40 @@ class TestSubmapping(TestCase):
             goal = Get("okay")
 
         class Outer(Mapping):
+            inner = Submapping(Inner, Get("nested"))
+
+        transformed = Outer().apply(source).serialize()
+        self.assertEqual({"inner": {"goal": 3}}, transformed)
+
+    def test_source_target_schema(self):
+        source = {
+            "nested": {
+                "okay": 3
+            }
+        }
+
+        class InnerSource(Schema):
+            okay = IntegerField()
+
+        class InnerTarget(Schema):
+            goal = IntegerField()
+
+        class Inner(Mapping):
+            source_schema = InnerSource
+            target_schema = InnerTarget
+
+            goal = Get("okay")
+
+        class OuterSource(Schema):
+            nested = Subschema(InnerSource)
+
+        class OuterTarget(Schema):
+            inner = Subschema(InnerTarget)
+
+        class Outer(Mapping):
+            source_schema = OuterSource
+            target_schema = OuterTarget
+
             inner = Submapping(Inner, Get("nested"))
 
         transformed = Outer().apply(source).serialize()

@@ -226,18 +226,6 @@ class TestSchemas(TestCase):
         expected = {"name": "Podunk"}
         self.assertEqual(expected, s)
 
-    def test_schema_keeps_its_raw_input(self):
-        """Raw input is kept around in case we need it"""
-        class Myschema(Schema):
-            wow = IntegerField()
-
-        m = Myschema(wow=1)
-        self.assertEqual({"wow": 1}, m._raw_input)
-
-        extras = {"wow": 1, "not_a_field": 2}
-        m = Myschema(extras)
-        self.assertEqual(extras, m._raw_input)
-
     def test_schema_can_use_defaults(self):
         s = DefaultsSchema().serialize()
         self.assertEqual(s.get("defaulted"), "testing")
