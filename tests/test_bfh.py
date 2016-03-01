@@ -317,6 +317,34 @@ class TestGenericSchema(TestCase):
         generic = GenericSchema(**source)
         self.assertEqual(source, generic.serialize())
 
+    def test_can_serialize_recursive(self):
+        """
+        When serializing, descend through arrays and subschemas.
+        """
+        inner1 = GenericSchema()
+        inner2 = GenericSchema(foo=["wow", inner1],
+                               bar=inner1,
+                               baz=[inner1, inner1])
+        outer = GenericSchema(inner=inner2, cool="ok")
+        expected_implicit_nulls = {
+            "inner": {
+                "foo": ["wow"],
+            },
+            "cool": "ok"
+        }
+        expected_explicit_nulls = {
+            "inner": {
+                "foo": ["wow", {}],
+                "bar": {},
+                "baz": [{}, {}]
+            },
+            "cool": "ok"
+        }
+        self.assertEqual(expected_implicit_nulls,
+                         outer.serialize(implicit_nulls=True))
+        self.assertEqual(expected_explicit_nulls,
+                         outer.serialize(implicit_nulls=False))
+
 
 class OneToTwoBase(Mapping):
     peas = Get('my_str')

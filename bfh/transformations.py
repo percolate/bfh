@@ -57,7 +57,8 @@ class All(TransformationInterface):
                         that don't appear in the schema.
 
     Returns:
-        the whole object (serialized if possible).
+        If strict == False and called on a Schema instance, a GenericSchema
+        Otherwise just the object.
     """
     def __init__(self, strict=False):
         self.strict = strict
@@ -65,17 +66,10 @@ class All(TransformationInterface):
     def __call__(self, source):
         return self.function(source)
 
-    @staticmethod
-    def _serialize_or_pass(item):
-        if hasattr(item, "serialize"):
-            return item.serialize()
-        return item
-
     def function(self, source):
-        if not self.strict and hasattr(source, '_raw_input'):
-            return {k: self._serialize_or_pass(v)
-                    for k, v in source._raw_input.items()}
-        return self._serialize_or_pass(source)
+        if not self.strict and hasattr(source, '_raw'):
+            return source._raw
+        return source
 
 
 class Get(TransformationInterface):
@@ -212,7 +206,7 @@ class ManySubmap(Submapping):
         results of applying submapping to each item in the input
     """
     def function(self, source, *call_args):  # source ignored
-        return [self.submapping_class().apply(item).serialize()
+        return [self.submapping_class().apply(item)
                 for item in _many_items(call_args)]
 
 
