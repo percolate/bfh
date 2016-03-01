@@ -5,8 +5,8 @@ from bfh import Schema, Mapping
 from bfh.exceptions import Missing
 from bfh.fields import (
     ArrayField,
-    Subschema,
     IntegerField,
+    Subschema,
     UnicodeField,
 )
 from bfh.transformations import (
@@ -44,7 +44,7 @@ class TestAll(TestCase):
 
         # by default extra keys are passed through
         allof = All()(m)
-        self.assertEqual(extras, allof)
+        self.assertEqual(extras, allof.serialize())
 
         # without a schema, we obvs have to pass everything
         schemaless = All(strict=True)(extras)
@@ -53,7 +53,7 @@ class TestAll(TestCase):
         # the 'strict' flag means extra kwargs outside the schema
         # get filtered out.
         filtered = All(strict=True)(m)
-        self.assertEqual({"wow": 1}, filtered)
+        self.assertEqual({"wow": 1}, filtered.serialize())
 
     def test_no_bad_implementation(self):
         """Don't leak state"""
@@ -64,8 +64,50 @@ class TestAll(TestCase):
         m = Myschema(first)
         m2 = Myschema()
 
-        self.assertEqual(first, All()(m))
-        self.assertEqual({}, All()(m2))
+        self.assertEqual(first, All()(m).serialize())
+        self.assertEqual({}, All()(m2).serialize())
+
+    def test_all_passes_dict(self):
+        source = {"foo": "bar", "wow": None}
+        allof = All()(source)
+        self.assertEqual(source, allof)
+
+    def test_all_passes_any_object(self):
+        class Some(object):
+            foo = "bar"
+            wow = None
+
+        instance = Some()
+        allof = All()(instance)
+        self.assertEqual(allof, instance)
+
+    def test_all_passes_nullish(self):
+        class Myschema(Schema):
+            maybe = ArrayField()
+
+        instance = Myschema(maybe=[])
+        allof = All(strict=True)(instance)
+        self.assertEqual(allof.maybe, [])
+
+    def test_all_nonstrict_mutation(self):
+        """
+        If schema instance is mutated, the output of All should reflect it.
+
+        """
+        class MySchema(Schema):
+            wow = IntegerField(required=False)
+
+        instance = MySchema(random=2)
+        instance.wow = 1
+        allof = All(strict=False)(instance)
+        self.assertEqual({"wow": 1, "random": 2},
+                         allof.serialize())
+
+        # strict on the other hand...
+        instance = MySchema(wow=1, random=2)
+        instance.wow = 2
+        allof = All(strict=True)(instance)
+        self.assertEqual({"wow": 2}, allof.serialize())
 
 
 class TestGet(TestCase):

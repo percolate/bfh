@@ -125,6 +125,14 @@ class Schema(SchemaInterface):
                 return False
         return True
 
+    @property
+    def _raw(self):
+        out = dict(**self._raw_input)
+        for name in self._field_names:
+            value = getattr(self, name)
+            out[name] = value
+        return GenericSchema(**out)
+
 
 class GenericSchema(SchemaInterface):
     """
@@ -142,6 +150,31 @@ class GenericSchema(SchemaInterface):
     def __getattr__(self, name):
         return self.__dict__.get(name)
 
+    def _serialize_value(self, value, implicit_nulls=True):
+        """
+        Serialize a value, recursively descending through the object to make
+        sure any nested objects are also serialized.
+
+        """
+        if hasattr(value, "serialize"):
+            value = value.serialize(implicit_nulls=implicit_nulls)
+
+        if isinstance(value, (list, tuple)):
+            items = []
+            for i in value:
+                ser = self._serialize_value(
+                    i, implicit_nulls=implicit_nulls)
+
+                if not nullish(ser, implicit_nulls=implicit_nulls):
+                    items.append(ser)
+
+            value = items
+
+        if implicit_nulls and nullish(
+                value, implicit_nulls=implicit_nulls):
+            return None
+        return value
+
     def serialize(self, implicit_nulls=True):
         """
         Represent generic schema as a dictionary.
@@ -154,11 +187,9 @@ class GenericSchema(SchemaInterface):
         """
         outd = {}
         for name, value in self.__dict__.items():
-            if hasattr(value, "serialize"):
-                value = value.serialize(implicit_nulls=implicit_nulls)
-
-            if implicit_nulls and nullish(value,
-                                          implicit_nulls=implicit_nulls):
+            value = self._serialize_value(value, implicit_nulls=implicit_nulls)
+            if implicit_nulls and nullish(
+                    value, implicit_nulls=implicit_nulls):
                 pass
             else:
                 outd[name] = value
