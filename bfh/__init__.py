@@ -162,22 +162,18 @@ class GenericSchema(SchemaInterface):
         if isinstance(value, (list, tuple)):
             items = []
             for i in value:
-                if hasattr(i, "serialize"):
-                    ser = i.serialize(implicit_nulls=implicit_nulls)
-                else:
-                    ser = self._serialize_value(
-                        i, implicit_nulls=implicit_nulls)
+                ser = self._serialize_value(
+                    i, implicit_nulls=implicit_nulls)
 
                 if not nullish(ser, implicit_nulls=implicit_nulls):
                     items.append(ser)
 
             value = items
 
-        if implicit_nulls and nullish(value,
-                                      implicit_nulls=implicit_nulls):
+        if implicit_nulls and nullish(
+                value, implicit_nulls=implicit_nulls):
             return None
-        else:
-            return value
+        return value
 
     def serialize(self, implicit_nulls=True):
         """

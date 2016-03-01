@@ -321,20 +321,30 @@ class TestGenericSchema(TestCase):
         """
         When serializing, descend through arrays and subschemas.
         """
+        class Some(Schema):
+            wow = ArrayField()
+
+        some_full = Some(wow=[1, 2])
+        some_nullish = Some(wow=[])
+
         inner1 = GenericSchema()
-        inner2 = GenericSchema(foo=["wow", inner1],
+        inner2 = GenericSchema(foo=["wow", inner1, some_full, some_nullish],
                                bar=inner1,
                                baz=[inner1, inner1])
         outer = GenericSchema(inner=inner2, cool="ok")
         expected_implicit_nulls = {
             "inner": {
-                "foo": ["wow"],
+                "foo": ["wow",
+                        {"wow": [1, 2]}],
             },
             "cool": "ok"
         }
         expected_explicit_nulls = {
             "inner": {
-                "foo": ["wow", {}],
+                "foo": ["wow",
+                        {},
+                        {"wow": [1, 2]},
+                        {"wow": []}],
                 "bar": {},
                 "baz": [{}, {}]
             },
