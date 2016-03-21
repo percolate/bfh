@@ -367,7 +367,9 @@ class DateToIsoString(Transformation):
     """
     def function(self, source, *call_args):  # source ignored
         try:
-            return call_args[0].isoformat()
+            argument = call_args[0]
+            if argument is not None:
+                return argument.isoformat()
         except (IndexError, AttributeError):
             raise ValueError("Not a datetime: %s" % (
                 call_args[0] if call_args else None))
