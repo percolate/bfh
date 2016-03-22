@@ -370,7 +370,7 @@ class DateToIsoString(Transformation):
     def function(self, source, *call_args):  # source ignored
         try:
             value = call_args[0]
-            if value in self.null_types:
+            if not self.required and value in self.null_types:
                 return value
             return value.isoformat()
         except (IndexError, AttributeError):
