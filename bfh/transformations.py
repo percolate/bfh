@@ -365,11 +365,14 @@ class DateToIsoString(Transformation):
     Turn a datetime into an ISO 8601 formatted string.
 
     """
+    null_types = (None,)
+
     def function(self, source, *call_args):  # source ignored
         try:
-            argument = call_args[0]
-            if argument is not None:
-                return argument.isoformat()
+            value = call_args[0]
+            if value in self.null_types:
+                return value
+            return value.isoformat()
         except (IndexError, AttributeError):
             raise ValueError("Not a datetime: %s" % (
                 call_args[0] if call_args else None))
