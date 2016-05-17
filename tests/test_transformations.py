@@ -1,7 +1,7 @@
 import datetime
 from unittest import TestCase
 
-from bfh import Schema, Mapping
+from bfh import Schema, Mapping, GenericSchema
 from bfh.exceptions import Missing
 from bfh.fields import (
     ArrayField,
@@ -108,6 +108,24 @@ class TestAll(TestCase):
         instance.wow = 2
         allof = All(strict=True)(instance)
         self.assertEqual({"wow": 2}, allof.serialize())
+
+    def test_all_on_generic_schema(self):
+        """
+        All should work with GenericSchema()
+
+        """
+        class AllLax(Mapping):
+            obj = All(strict=False)
+
+        class AllStrict(Mapping):
+            obj = All(strict=True)
+
+        source = GenericSchema(**{"target": 1})
+
+        for mapping in (AllLax, AllStrict):
+            result = mapping().apply(source).serialize()
+            expected = {"obj": {"target": 1}}
+            self.assertEqual(expected, result)
 
 
 class TestGet(TestCase):

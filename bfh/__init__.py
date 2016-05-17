@@ -142,7 +142,7 @@ class GenericSchema(SchemaInterface):
     def __init__(self, **kwargs):
         """
         Args:
-            as_dict (dict) - a blob from which to infer a schema
+            kwargs (dict) - a blob from which to infer a schema
         """
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -206,6 +206,10 @@ class GenericSchema(SchemaInterface):
     @property
     def is_empty(self):
         return all(nullish(v) for v in self.__dict__.values())
+
+    @property
+    def _raw(self):
+        return self
 
 
 class Mapping(MappingInterface):
