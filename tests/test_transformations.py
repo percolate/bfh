@@ -36,6 +36,40 @@ except NameError:
 
 
 class TestAll(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.basic_data = {
+            'content': 'some text',
+            'id': 98749832,
+            'user': {
+                'name': 'Travis',
+                'profile_img': 'tada.jpg'
+            }
+        }
+        cls.non_strict_output = {
+            'd': None,
+            'user_name': 'Travis',
+            'object': {
+                'content': 'some text',
+                'id': 98749832,
+                'user': {
+                    'name': 'Travis',
+                    'profile_img': 'tada.jpg'
+                }
+            }
+        }
+        cls.strict_output = {
+            'd': None,
+            'user_name': 'Travis',
+            'object': {
+                'id': 98749832,
+                'user': {
+                    'name': 'Travis',
+                }
+            }
+        }
+
     def test_all_is_all_by_default(self):
         class Myschema(Schema):
             wow = IntegerField()
@@ -128,28 +162,7 @@ class TestAll(TestCase):
             expected = {"obj": {"target": 1}}
             self.assertEqual(expected, result)
 
-    def test_all_strict_preserve_extra_field_if_false(self):
-        data = {
-            'content': 'some text',
-            'id': 98749832,
-            'user': {
-                'name': 'Travis',
-                'profile_img': 'tada.jpg'
-            }
-        }
-        expected = {
-            'd': None,
-            'user_name': 'Travis',
-            'object': {
-                'content': 'some text',
-                'id': 98749832,
-                'user': {
-                    'name': 'Travis',
-                    'profile_img': 'tada.jpg'
-                }
-            }
-        }
-
+    def test_all_transformation_strict(self):
         class User(Schema):
             name = UnicodeField()
 
@@ -162,16 +175,25 @@ class TestAll(TestCase):
             user_name = UnicodeField()
             object = ObjectField()
 
-        class SomeProblematicMapping(Mapping):
+        class SomeNonStrictMapping(Mapping):
             source_schema = Message
             target_schema = Transformed
 
             user_name = Get('user', 'name')
             object = All(strict=False)
 
-        res = SomeProblematicMapping().apply(data).serialize()
+        class SomeStrictMapping(Mapping):
+            source_schema = Message
+            target_schema = Transformed
 
-        self.assertDictEqual(expected, res)
+            user_name = Get('user', 'name')
+            object = All(strict=True)
+
+        non_strict = SomeNonStrictMapping().apply(self.basic_data).serialize()
+        strict = SomeStrictMapping().apply(self.basic_data).serialize()
+
+        self.assertDictEqual(self.non_strict_output, non_strict)
+        self.assertDictEqual(self.strict_output, strict)
 
 
 class TestGet(TestCase):
