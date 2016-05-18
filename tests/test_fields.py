@@ -378,7 +378,7 @@ class TestDefaultValuesForField(TestCase):
         second_schema = self.set_up_schema(None)
         second_source = second_schema()
 
-        self.assertEqual({}, second_source.serialize())
+        self.assertEqual({}, second_source.serialize(implicit_nulls=True))
 
     def test_callable_as_default(self):
 

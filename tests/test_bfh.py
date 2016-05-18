@@ -172,9 +172,9 @@ class TestSchemas(TestCase):
 
     def test_implicit_nulls(self):
         """Implicit nulls by default"""
-        result = Conversation().serialize()
+        result = Conversation().serialize(implicit_nulls=True)
         self.assertEqual({}, result)
-        result = Conversation(numbers=[1, 2]).serialize()
+        result = Conversation(numbers=[1, 2]).serialize(implicit_nulls=True)
         self.assertEqual({"numbers": [1, 2]}, result)
         result = Conversation().serialize(implicit_nulls=False)
         self.assertEqual({"numbers": None, "conversants": None}, result)
@@ -183,7 +183,7 @@ class TestSchemas(TestCase):
 
     def test_false_is_not_null(self):
         """We treat several things as null-ish, but False is not one of them"""
-        result = Conversation(numbers=False).serialize()
+        result = Conversation(numbers=False).serialize(implicit_nulls=True)
         self.assertEqual({"numbers": False}, result)
 
     def test_subschema_implicit_nulls(self):
@@ -198,7 +198,7 @@ class TestSchemas(TestCase):
         s = Ship(my_ship).serialize(implicit_nulls=False)
         self.assertEqual(my_ship, s)
 
-        s = Ship(my_ship).serialize()
+        s = Ship(my_ship).serialize(implicit_nulls=True)
         expected = {
             "name": "Podunk",
             "captain": {
@@ -211,7 +211,7 @@ class TestSchemas(TestCase):
             "name": "Podunk",
             "captain": {}
         }
-        s = Ship(my_ship).serialize()
+        s = Ship(my_ship).serialize(implicit_nulls=True)
 
         expected = {"name": "Podunk"}
         self.assertEqual(expected, s)
@@ -221,7 +221,7 @@ class TestSchemas(TestCase):
             "captain": Person(first_name=None,
                               last_name=None)
         }
-        s = Ship(my_ship).serialize()
+        s = Ship(my_ship).serialize(implicit_nulls=True)
 
         expected = {"name": "Podunk"}
         self.assertEqual(expected, s)
@@ -446,7 +446,7 @@ class TestMappings(TestCase):
         with self.assertRaises(Invalid):
             transformed.validate()
 
-        self.assertEqual({"cool": 1}, transformed.serialize())
+        self.assertEqual({"cool": 1}, transformed.serialize(implicit_nulls=True))
 
 
 class TestInheritance(TestCase):

@@ -74,7 +74,7 @@ class Schema(SchemaInterface):
         name = dedunder(name)
         return object.__getattribute__(self, name)
 
-    def serialize(self, implicit_nulls=True):
+    def serialize(self, implicit_nulls=False):
         """
         Represent this schema as a dictionary.
 
@@ -150,7 +150,7 @@ class GenericSchema(SchemaInterface):
     def __getattr__(self, name):
         return self.__dict__.get(name)
 
-    def _serialize_value(self, value, implicit_nulls=True):
+    def _serialize_value(self, value, implicit_nulls=False):
         """
         Serialize a value, recursively descending through the object to make
         sure any nested objects are also serialized.
@@ -175,7 +175,7 @@ class GenericSchema(SchemaInterface):
             return None
         return value
 
-    def serialize(self, implicit_nulls=True):
+    def serialize(self, implicit_nulls=False):
         """
         Represent generic schema as a dictionary.
 
