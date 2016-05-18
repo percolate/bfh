@@ -8,6 +8,7 @@ from bfh.fields import (
     IntegerField,
     Subschema,
     UnicodeField,
+    ObjectField,
 )
 from bfh.transformations import (
     All,
@@ -126,6 +127,49 @@ class TestAll(TestCase):
             result = mapping().apply(source).serialize()
             expected = {"obj": {"target": 1}}
             self.assertEqual(expected, result)
+
+    def test_all_strict_preserve_extra_field_if_false(self):
+        data = {
+            'content': 'some text',
+            'id': 98749832,
+            'user': {
+                'name': 'Travis',
+                'profile_img': 'tada.jpg'
+            }
+        }
+        expected = {
+            'user_name': 'Travis',
+            'object': {
+                'content': 'some text',
+                'id': 98749832,
+                'user': {
+                    'name': 'Travis',
+                    'profile_img': 'tada.jpg'
+                }
+            }
+        }
+
+        class User(Schema):
+            name = UnicodeField()
+
+        class Message(Schema):
+            id = IntegerField()
+            user = Subschema(User)
+
+        class Transformed(Schema):
+            d = UnicodeField(required=False)
+            user_name = UnicodeField()
+            object = ObjectField()
+
+        class SomeProblematicMapping(Mapping):
+            source_schema = Message
+            target_schema = Transformed
+
+            user_name = Get('user', 'name')
+            object = All(strict=False)
+
+        res = SomeProblematicMapping().apply(data).serialize()
+        self.assertDictEqual(expected, res)
 
 
 class TestGet(TestCase):
@@ -569,3 +613,4 @@ class TestMany(TestCase):
 
         transformed = HasNone().apply({}).serialize(implicit_nulls=True)
         self.assertEqual({}, transformed)
+
