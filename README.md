@@ -106,6 +106,31 @@ In a mapping, use the de-dundered name
     Get("if")
 
 
+## Implicit null values and serialization
+
+Given a sample dataset:
+```json
+    {
+        "name": "peg",
+        "age": null
+    }
+```
+
+If you call serialize with the default kwargs, you would get the following behavior:
+```python
+transformed = SomeMapping().apply(parsed_data).serialize()
+>>> {'name': 'peg', 'age': None}
+```
+
+But if `implicit_nulls` is set to True, you would get:
+```python
+transformed = SomeMapping().apply(parsed_data).serialize(implicit_nulls=True)
+>>> {'name': 'peg'}
+```
+
+This can be useful to filter out null values from a dataset on serialization.
+
+
 ## Build Status
 
 Tested on Python 2.7.10 and 3.5.0:
