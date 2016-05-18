@@ -1,9 +1,5 @@
 # CHANGELOG
 
-## 0.5.2
-
-- Behavior change: `implicit_nulls` is now set to False by default when calling `Schema.serialize()`
-
 ## 0.5.1
 
 - Bugfix: `All` transformation works correctly with `GenericSchema`

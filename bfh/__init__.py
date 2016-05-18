@@ -41,7 +41,7 @@ class Schema(SchemaInterface):
         """
         Args:
            Pass a dictionary a single positional argument and it will be
-           tranformed into kwargs.
+           transformed into kwargs.
 
         Kwargs:
            Values to assign to fields in the schema. Unknown names are ignored.
