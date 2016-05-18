@@ -65,7 +65,7 @@ class TestAll(TestCase):
         m2 = Myschema()
 
         self.assertEqual(first, All()(m).serialize())
-        self.assertEqual({}, All()(m2).serialize(implicit_nulls=True))
+        self.assertEqual({'wow': None}, All()(m2).serialize(implicit_nulls=False))
 
     def test_all_passes_dict(self):
         source = {"foo": "bar", "wow": None}
@@ -476,11 +476,11 @@ class TestIdempotence(TestCase):
         second = {}
         third = {"wow": 3}
         result1 = Hm().apply(first).serialize()
-        result2 = Hm().apply(second).serialize(implicit_nulls=True)
+        result2 = Hm().apply(second).serialize()
         result3 = Hm().apply(third).serialize()
 
         assert result1 == first
-        assert result2 == second
+        assert result2 == {"wow": None}
         assert result3 == third
 
 
