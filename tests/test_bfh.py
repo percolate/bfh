@@ -170,14 +170,19 @@ class TestSchemas(TestCase):
         s = Conversation(my_convo)
         self.assertEqual(s.serialize(), my_convo)
 
-    def test_implicit_nulls(self):
-        """Implicit nulls by default"""
+    def test_implicit_nulls_True(self):
+        """Implicit nulls when True"""
         result = Conversation().serialize(implicit_nulls=True)
         self.assertEqual({}, result)
+
         result = Conversation(numbers=[1, 2]).serialize(implicit_nulls=True)
         self.assertEqual({"numbers": [1, 2]}, result)
+
+    def test_implicit_nulls_False(self):
+        """Implicit nulls when False"""
         result = Conversation().serialize(implicit_nulls=False)
         self.assertEqual({"numbers": None, "conversants": None}, result)
+
         result = Conversation(numbers=[1, 2]).serialize(implicit_nulls=False)
         self.assertEqual({"numbers": [1, 2], "conversants": None}, result)
 
