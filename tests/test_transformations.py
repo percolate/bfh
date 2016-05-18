@@ -138,6 +138,7 @@ class TestAll(TestCase):
             }
         }
         expected = {
+            'd': None,
             'user_name': 'Travis',
             'object': {
                 'content': 'some text',
@@ -169,6 +170,7 @@ class TestAll(TestCase):
             object = All(strict=False)
 
         res = SomeProblematicMapping().apply(data).serialize()
+
         self.assertDictEqual(expected, res)
 
 

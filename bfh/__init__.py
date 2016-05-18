@@ -130,7 +130,10 @@ class Schema(SchemaInterface):
         out = dict(**self._raw_input)
         for name in self._field_names:
             value = getattr(self, name)
-            out[name] = value
+            if isinstance(value, Schema):
+                out[name] = value._raw
+            else:
+                out[name] = value
         return GenericSchema(**out)
 
 
