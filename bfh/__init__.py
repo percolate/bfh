@@ -40,7 +40,7 @@ class Schema(SchemaInterface):
     def __init__(self, *args, **kwargs):
         """
         Args:
-           Pass a dictionary a single positional argument and it will be
+           Pass a dictionary as a single positional argument and it will be
            transformed into kwargs.
 
         Kwargs:
