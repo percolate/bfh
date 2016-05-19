@@ -130,10 +130,11 @@ class Schema(SchemaInterface):
         out = dict(**self._raw_input)
         for name in self._field_names:
             value = getattr(self, name)
-            if isinstance(value, Schema):
+            if isinstance(value, SchemaInterface):
                 out[name] = value._raw
             else:
                 out[name] = value
+
         return GenericSchema(**out)
 
 
@@ -212,7 +213,12 @@ class GenericSchema(SchemaInterface):
 
     @property
     def _raw(self):
-        return self
+        out = dict(**self.__dict__)
+        for k, v in out.items():
+            if isinstance(v, SchemaInterface):
+                out[k] = v._raw
+
+        return GenericSchema(**out)
 
 
 class Mapping(MappingInterface):

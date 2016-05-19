@@ -195,6 +195,133 @@ class TestAll(TestCase):
         self.assertDictEqual(self.non_strict_output, non_strict)
         self.assertDictEqual(self.strict_output, strict)
 
+    def test_all_on_nested_generic_schema(self):
+        nested_data = {
+            'user': {
+                'name': 'Peanut',
+                'profile_img': 'lala.jpg',
+                'extra': {
+                    'slug': 'Snoopy is amazing.',
+                    'not_defined': 'should still show up',
+                    'sub_extra': {
+                        'deep': 2,
+                        'x': 'y'
+                    }
+                }
+            }
+        }
+        nested_strict_data = {
+            'user': {
+                'name': 'Peanut',
+                'extra': {
+                    'slug': 'Snoopy is amazing.',
+                    'sub_extra': {
+                        'deep': 2,
+                    }
+                }
+            }
+        }
+
+        class SubExtra(GenericSchema):
+            deep = IntegerField()
+
+        class SourceExtra(Schema):
+            slug = UnicodeField()
+            sub_extra = Subschema(SubExtra)
+
+        class SourceUser(GenericSchema):
+            name = UnicodeField()
+
+            # All() should know how to deal with a Schema within
+            # a GenericSchema
+            extra = Subschema(SourceExtra)
+
+        class Source(Schema):
+            user = Subschema(SourceUser)
+
+        class Target(Schema):
+            object = ObjectField()
+
+        class NestedMapping(Mapping):
+
+            source_schema = Source
+            target_schema = Target
+
+            object = All()
+
+        class NestedStrictMapping(Mapping):
+
+            source_schema = Source
+            target_schema = Target
+
+            object = All(strict=True)
+
+        res = NestedMapping().apply(nested_data).serialize()
+        self.assertDictEqual({'object': nested_data}, res)
+
+        res = NestedStrictMapping().apply(nested_data).serialize()
+        self.assertDictEqual({'object': nested_strict_data}, res)
+
+    def test_all_on_iterable_containing_schemas(self):
+
+        nested_data = {
+            'bananas': [
+                {
+                    'color': 'yellow',
+                    'persona': 'minions',
+                    'nutrients': [
+                        {
+                            'name': 'Saturated fat',
+                            'value': 0.1
+                        },
+                        {
+                            'name': 'Polyunsaturated fat',
+                            'value': 0.2
+                        },
+
+                    ]
+                },
+                {
+                    'color': 'green',
+                    'variety': 'plantain',
+                    'nutrients': [
+                        {
+                            'name': 'Potassium',
+                            'value': 422
+                        },
+                        {
+                            'name': 'Carbohydrate',
+                            'value': 14
+                        },
+                    ]
+                }
+            ]
+        }
+
+        class Nutrient(Schema):
+            name = UnicodeField()
+
+        class Banana(GenericSchema):
+            color = UnicodeField()
+            nutrients = ArrayField(Nutrient)
+
+        class Source(Schema):
+            bananas = ArrayField(Banana)
+
+        class Target(Schema):
+            object = ObjectField()
+
+        class NestedMappingWithIter(Mapping):
+
+            source_schema = Source
+            target_schema = Target
+
+            object = All(strict=True)
+
+        #import pdb; pdb.set_trace()
+        #res = NestedMappingWithIter().apply(nested_data).serialize()
+        #self.assertDictEqual({'object': nested_data}, res)
+
 
 class TestGet(TestCase):
     def test_can_get_from_dict(self):
