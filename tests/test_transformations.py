@@ -48,7 +48,6 @@ class TestAll(TestCase):
             }
         }
         cls.non_strict_output = {
-            'd': None,
             'user_name': 'Travis',
             'object': {
                 'content': 'some text',
@@ -60,7 +59,6 @@ class TestAll(TestCase):
             }
         }
         cls.strict_output = {
-            'd': None,
             'user_name': 'Travis',
             'object': {
                 'id': 98749832,
@@ -171,7 +169,6 @@ class TestAll(TestCase):
             user = Subschema(User)
 
         class Transformed(Schema):
-            d = UnicodeField(required=False)
             user_name = UnicodeField()
             object = ObjectField()
 
@@ -194,6 +191,23 @@ class TestAll(TestCase):
 
         self.assertDictEqual(self.non_strict_output, non_strict)
         self.assertDictEqual(self.strict_output, strict)
+
+    def test_all_transformation_generic_schema(self):
+
+        class SomeNonStrictMapping(Mapping):
+            user_name = Get('user', 'name')
+            object = All(strict=False)
+
+        class SomeStrictMapping(Mapping):
+            user_name = Get('user', 'name')
+            object = All(strict=True)
+
+        non_strict = SomeNonStrictMapping().apply(self.basic_data).serialize()
+        strict = SomeStrictMapping().apply(self.basic_data).serialize()
+
+        # All fields should be included, regardless of the strict param
+        self.assertDictEqual(self.non_strict_output, non_strict)
+        self.assertDictEqual(self.non_strict_output, strict)
 
     def test_all_on_nested_generic_schema(self):
         nested_data = {
@@ -222,14 +236,14 @@ class TestAll(TestCase):
             }
         }
 
-        class SubExtra(GenericSchema):
+        class SubExtra(Schema):
             deep = IntegerField()
 
         class SourceExtra(Schema):
             slug = UnicodeField()
             sub_extra = Subschema(SubExtra)
 
-        class SourceUser(GenericSchema):
+        class SourceUser(Schema):
             name = UnicodeField()
 
             # All() should know how to deal with a Schema within
@@ -263,7 +277,6 @@ class TestAll(TestCase):
         self.assertDictEqual({'object': nested_strict_data}, res)
 
     def test_all_on_iterable_containing_schemas(self):
-
         nested_data = {
             'bananas': [
                 {
@@ -301,7 +314,7 @@ class TestAll(TestCase):
         class Nutrient(Schema):
             name = UnicodeField()
 
-        class Banana(GenericSchema):
+        class Banana(Schema):
             color = UnicodeField()
             nutrients = ArrayField(Nutrient)
 
@@ -318,9 +331,10 @@ class TestAll(TestCase):
 
             object = All(strict=True)
 
-        #import pdb; pdb.set_trace()
-        #res = NestedMappingWithIter().apply(nested_data).serialize()
-        #self.assertDictEqual({'object': nested_data}, res)
+        res = NestedMappingWithIter().apply(nested_data).serialize()
+        # import pdb
+        # pdb.set_trace()
+        # self.assertDictEqual({'object': nested_data}, res)
 
 
 class TestGet(TestCase):
