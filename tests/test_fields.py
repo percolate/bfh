@@ -380,3 +380,25 @@ class TestDefaultValuesForField(TestCase):
         second_schema = self.set_up_schema(test_false_callable)
         second_source = second_schema()
         self.assertEqual({"foo": False}, second_source.serialize())
+
+
+class TestSubSchemaCoercion(TestCase):
+    def test_explicit_array_coercion(self):
+        class Inner(Schema):
+            foo = UnicodeField()
+
+        class Outer(Schema):
+            many = ArrayField(Inner)
+
+        my_outer = Outer(many=[{"foo": "bar"}])
+        self.assertIsInstance(my_outer.many[0], Inner)
+
+    def test_subschema_coercion(self):
+        class Inner(Schema):
+            foo = UnicodeField()
+
+        class Outer(Schema):
+            inner = Subschema(Inner)
+
+        my_outer = Outer(inner={"foo": "bar"})
+        self.assertIsInstance(my_outer.inner, Inner)
