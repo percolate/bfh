@@ -125,15 +125,27 @@ class Schema(SchemaInterface):
                 return False
         return True
 
+    @staticmethod
+    def _get_raw_value(value):
+        if isinstance(value, SchemaInterface):
+            return value._raw
+        
+        elif isinstance(value, list):
+            result = []
+            for i in value:
+                result.append(Schema._get_raw_value(i))
+
+            return result
+
+        else:
+            return value
+
     @property
     def _raw(self):
         out = dict(**self._raw_input)
         for name in self._field_names:
             value = getattr(self, name)
-            if isinstance(value, SchemaInterface):
-                out[name] = value._raw
-            else:
-                out[name] = value
+            out[name] = Schema._get_raw_value(value)
 
         return GenericSchema(**out)
 

@@ -311,6 +311,34 @@ class TestAll(TestCase):
             ]
         }
 
+        strict_nested_data = {
+            'bananas': [
+                {
+                    'color': 'yellow',
+                    'nutrients': [
+                        {
+                            'name': 'Saturated fat',
+                        },
+                        {
+                            'name': 'Polyunsaturated fat',
+                        },
+
+                    ]
+                },
+                {
+                    'color': 'green',
+                    'nutrients': [
+                        {
+                            'name': 'Potassium',
+                        },
+                        {
+                            'name': 'Carbohydrate',
+                        },
+                    ]
+                }
+            ]
+        }
+
         class Nutrient(Schema):
             name = UnicodeField()
 
@@ -329,12 +357,20 @@ class TestAll(TestCase):
             source_schema = Source
             target_schema = Target
 
+            object = All(strict=False)
+
+        class StrictNestedMappingWithIter(Mapping):
+
+            source_schema = Source
+            target_schema = Target
+
             object = All(strict=True)
 
         res = NestedMappingWithIter().apply(nested_data).serialize()
-        # import pdb
-        # pdb.set_trace()
-        # self.assertDictEqual({'object': nested_data}, res)
+        self.assertDictEqual({'object': nested_data}, res)
+
+        res = StrictNestedMappingWithIter().apply(nested_data).serialize()
+        self.assertDictEqual({'object': strict_nested_data}, res)
 
 
 class TestGet(TestCase):
