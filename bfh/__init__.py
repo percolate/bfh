@@ -22,7 +22,37 @@ __all__ = [
 ]
 
 
-class Schema(SchemaInterface):
+def _get_raw_value(value):
+    """
+    Helper to recurse within a schema structure
+
+    """
+    if isinstance(value, SchemaInterface):
+        return value._raw
+
+    elif isinstance(value, (list, tuple)):
+        result = []
+        for i in value:
+            result.append(_get_raw_value(i))
+        return result
+
+    else:
+        return value
+
+
+class SchemaMixin(object):
+
+    @property
+    def _raw(self):
+        out = dict(**self._raw_input)
+        for name in self._field_names:
+            value = getattr(self, name)
+            out[name] = _get_raw_value(value)
+
+        return GenericSchema(**out)
+
+
+class Schema(SchemaMixin, SchemaInterface):
     """
     A base class for defining your schemas:
 
@@ -125,31 +155,8 @@ class Schema(SchemaInterface):
                 return False
         return True
 
-    @staticmethod
-    def _get_raw_value(value):
-        if isinstance(value, SchemaInterface):
-            return value._raw
-        
-        elif isinstance(value, list):
-            result = []
-            for i in value:
-                result.append(Schema._get_raw_value(i))
-            return result
 
-        else:
-            return value
-
-    @property
-    def _raw(self):
-        out = dict(**self._raw_input)
-        for name in self._field_names:
-            value = getattr(self, name)
-            out[name] = Schema._get_raw_value(value)
-
-        return GenericSchema(**out)
-
-
-class GenericSchema(SchemaInterface):
+class GenericSchema(SchemaMixin, SchemaInterface):
     """
     A generic schema to use when none is specified.
 
@@ -221,15 +228,6 @@ class GenericSchema(SchemaInterface):
     @property
     def is_empty(self):
         return all(nullish(v) for v in self.__dict__.values())
-
-    @property
-    def _raw(self):
-        out = dict(**self.__dict__)
-        for k, v in out.items():
-            if isinstance(v, SchemaInterface):
-                out[k] = v._raw
-
-        return GenericSchema(**out)
 
 
 class Mapping(MappingInterface):
