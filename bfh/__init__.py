@@ -134,7 +134,6 @@ class Schema(SchemaInterface):
             result = []
             for i in value:
                 result.append(Schema._get_raw_value(i))
-
             return result
 
         else:

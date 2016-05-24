@@ -814,4 +814,3 @@ class TestMany(TestCase):
 
         transformed = HasNone().apply({}).serialize(implicit_nulls=True)
         self.assertEqual({}, transformed)
-
