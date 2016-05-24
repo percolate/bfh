@@ -331,6 +331,26 @@ class ArrayField(SimpleTypeField):
         super(ArrayField, self).__init__(**kwargs)
         self.array_type = array_type
 
+    def __set__(self, instance, value):
+        # don't coerce simple Python types here; under the current regime
+        # that happens at serialization. just set the value.
+        if (self.array_type is None
+                or not issubclass(self.array_type, SchemaInterface)):
+            instance.__dict__[self.field_name] = value
+            return
+
+        # when we have a schema array type, assume any dict
+        # passed is trying to fit the schema.
+        result = []
+        for i in value:
+            if isinstance(i, dict):
+                result.append(self.array_type(**i))
+            else:
+                # could already be a Schema instance, or maybe it's not even
+                # valid, but we don't care, we're not validating here
+                result.append(i)
+        instance.__dict__[self.field_name] = result
+
     def _flatten(self, value, implicit_nulls=True):
         if hasattr(value, 'serialize'):
             return value.serialize(implicit_nulls=implicit_nulls)

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.6.0
+
+- Breaking change: When `ArrayField` declared with a Schema type as
+  optional array type, coerce incoming dicts into that schema, just
+  as we do with Subschema fields.
+
+- Breaking change: in serialization, we are moving the default value of
+  implicit_nulls from True to False. We judge that the more explicit
+  behavior is the more general case, and implicit_nulls is the
+  special case.
+
 ## 0.5.1
 
 - Bugfix: `All` transformation works correctly with `GenericSchema`
