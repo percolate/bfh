@@ -229,9 +229,8 @@ class GenericSchema(SchemaInterface):
     @property
     def _raw(self):
         out = dict(**self.__dict__)
-        for name in self._field_names:
-            value = getattr(self, name)
-            out[name] = _get_raw_value(value)
+        for key, val in out.items():
+            out[key] = _get_raw_value(val)
 
         return GenericSchema(**out)
 
