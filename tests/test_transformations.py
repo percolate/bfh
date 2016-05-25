@@ -154,6 +154,30 @@ class TestAll(TestCase):
         del data['whatever']
         self.assertDictEqual(data, All(strict=True)(sch).serialize())
 
+    def test_schema_non_strict_all_shows_all_on_subschema(self):
+        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+
+        class Second(Schema):
+            prop = IntegerField()
+
+        class First(Schema):
+            second = Subschema(Second)
+
+        sch = First(**data)
+        self.assertDictEqual(data, All()(sch).serialize())
+
+    def test_generic_schema_non_strict_all_shows_all_on_subschema(self):
+        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+
+        class Second(GenericSchema):
+            prop = IntegerField()
+
+        class First(GenericSchema):
+            second = Subschema(Second)
+
+        sch = First(**data)
+        self.assertDictEqual(data, All()(sch).serialize())
+
 
 class TestGet(TestCase):
     def test_can_get_from_dict(self):
