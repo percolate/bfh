@@ -11,6 +11,12 @@
   behavior is the more general case, and implicit_nulls is the
   special case.
 
+- Bugfix: `All` transformation works correctly with arbitrarily nested
+  Schema/GenericSchema, including those inside lists or ArrayField.
+
+- Bugfix: DateToIsoString won't error when value is None and field is not
+  required.
+
 ## 0.5.1
 
 - Bugfix: `All` transformation works correctly with `GenericSchema`
