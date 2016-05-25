@@ -365,21 +365,6 @@ class TestDefaultValuesForField(TestCase):
         self.assertEqual(my2.foo, {"wow": 1})
         self.assertEqual(my1.foo, {"wow": 2})
 
-    def test_empty_fields_serialized_with_defaults(self):
-
-        first_schema = self.set_up_schema("testing")
-        source = first_schema()
-        assert source.validate()
-
-        # Note, if there is a default, it will serialize
-        self.assertEqual({"foo": "testing"}, source.serialize())
-
-        # No default, won't.
-        second_schema = self.set_up_schema(None)
-        second_source = second_schema()
-
-        self.assertEqual({}, second_source.serialize())
-
     def test_callable_as_default(self):
 
         def test_callable():
@@ -395,3 +380,25 @@ class TestDefaultValuesForField(TestCase):
         second_schema = self.set_up_schema(test_false_callable)
         second_source = second_schema()
         self.assertEqual({"foo": False}, second_source.serialize())
+
+
+class TestSubSchemaCoercion(TestCase):
+    def test_explicit_array_coercion(self):
+        class Inner(Schema):
+            foo = UnicodeField()
+
+        class Outer(Schema):
+            many = ArrayField(Inner)
+
+        my_outer = Outer(many=[{"foo": "bar"}])
+        self.assertIsInstance(my_outer.many[0], Inner)
+
+    def test_subschema_coercion(self):
+        class Inner(Schema):
+            foo = UnicodeField()
+
+        class Outer(Schema):
+            inner = Subschema(Inner)
+
+        my_outer = Outer(inner={"foo": "bar"})
+        self.assertIsInstance(my_outer.inner, Inner)

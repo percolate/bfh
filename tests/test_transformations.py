@@ -1,13 +1,12 @@
 import datetime
 from unittest import TestCase
 
-from bfh import Schema, Mapping
+from bfh import Schema, Mapping, GenericSchema
 from bfh.exceptions import Missing
 from bfh.fields import (
     ArrayField,
     IntegerField,
     Subschema,
-    UnicodeField,
 )
 from bfh.transformations import (
     All,
@@ -35,6 +34,7 @@ except NameError:
 
 
 class TestAll(TestCase):
+
     def test_all_is_all_by_default(self):
         class Myschema(Schema):
             wow = IntegerField()
@@ -65,7 +65,7 @@ class TestAll(TestCase):
         m2 = Myschema()
 
         self.assertEqual(first, All()(m).serialize())
-        self.assertEqual({}, All()(m2).serialize())
+        self.assertEqual({'wow': None}, All()(m2).serialize(implicit_nulls=False))
 
     def test_all_passes_dict(self):
         source = {"foo": "bar", "wow": None}
@@ -108,6 +108,75 @@ class TestAll(TestCase):
         instance.wow = 2
         allof = All(strict=True)(instance)
         self.assertEqual({"wow": 2}, allof.serialize())
+
+    def test_all_on_generic_schema(self):
+        """
+        All should work with GenericSchema()
+
+        """
+        class AllLax(Mapping):
+            obj = All(strict=False)
+
+        class AllStrict(Mapping):
+            obj = All(strict=True)
+
+        source = GenericSchema(**{"target": 1})
+
+        for mapping in (AllLax, AllStrict):
+            result = mapping().apply(source).serialize()
+            expected = {"obj": {"target": 1}}
+            self.assertEqual(expected, result)
+
+    def test_all_on_nested_schema(self):
+        """
+        All should work on nested Schema
+
+        """
+        class ManySchema(Schema):
+            prop = IntegerField()
+
+        class SecondSchema(Schema):
+            those = ArrayField(ManySchema)
+
+        class FirstSchema(Schema):
+            that = Subschema(SecondSchema)
+
+        data = {
+            'that': {
+                'those': [{'prop': 1}, {'prop': 2}]
+            },
+            'whatever': 'right'
+        }
+        sch = FirstSchema(**data)
+
+        self.assertDictEqual(data, All()(sch).serialize())
+
+        del data['whatever']
+        self.assertDictEqual(data, All(strict=True)(sch).serialize())
+
+    def test_schema_non_strict_all_shows_all_on_subschema(self):
+        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+
+        class Second(Schema):
+            prop = IntegerField()
+
+        class First(Schema):
+            second = Subschema(Second)
+
+        sch = First(**data)
+        self.assertDictEqual(data, All()(sch).serialize())
+
+    def test_generic_schema_non_strict_all_shows_all_on_subschema(self):
+        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+
+        class Second(GenericSchema):
+            prop = IntegerField()
+
+        class First(GenericSchema):
+            second = Subschema(Second)
+
+        sch = First(**data)
+        self.assertDictEqual(data, All()(sch).serialize())
 
 
 class TestGet(TestCase):
@@ -448,8 +517,8 @@ class TestSubmapping(TestCase):
             None,
         ]
         for source in empties:
-            self.assertEqual({}, Outer().apply(source).serialize())
-            self.assertEqual({}, OuterNoschema().apply(source).serialize())
+            self.assertEqual({}, Outer().apply(source).serialize(implicit_nulls=True))
+            self.assertEqual({}, OuterNoschema().apply(source).serialize(implicit_nulls=True))
 
 
 class TestIdempotence(TestCase):
@@ -466,7 +535,7 @@ class TestIdempotence(TestCase):
         result3 = Hm().apply(third).serialize()
 
         assert result1 == first
-        assert result2 == second
+        assert result2 == {"wow": None}
         assert result3 == third
 
 
@@ -498,20 +567,15 @@ class TestMany(TestCase):
 
         source = {"wow": []}
         expected = {}
-        transformed = Simpler().apply(source).serialize()
+        transformed = Simpler().apply(source).serialize(implicit_nulls=True)
         self.assertEqual(expected, transformed)
 
         source = {"wow": None}
         expected = {}
-        transformed = Simpler().apply(source).serialize()
+        transformed = Simpler().apply(source).serialize(implicit_nulls=True)
         self.assertEqual(expected, transformed)
 
     def test_many_submap(self):
-        class Inner(Schema):
-            wow = UnicodeField()
-
-        class Source(Schema):
-            items = ArrayField(Subschema(Inner))
 
         class Sub(Mapping):
             inner = Get('wow')
@@ -540,7 +604,7 @@ class TestMany(TestCase):
 
         source = {"items": []}
         expected = {"const": 1}
-        transformed = WithConst().apply(source).serialize()
+        transformed = WithConst().apply(source).serialize(implicit_nulls=True)
         self.assertEqual(expected, transformed)
 
         class Deep(Mapping):
@@ -552,11 +616,11 @@ class TestMany(TestCase):
             }
         }
         expected = {}
-        transformed = Deep().apply(source).serialize()
+        transformed = Deep().apply(source).serialize(implicit_nulls=True)
         self.assertEqual(expected, transformed)
 
         class HasNone(Mapping):
             inner = ManySubmap(Sub, Const(None))
 
-        transformed = HasNone().apply({}).serialize()
+        transformed = HasNone().apply({}).serialize(implicit_nulls=True)
         self.assertEqual({}, transformed)

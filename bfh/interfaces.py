@@ -102,6 +102,13 @@ class SchemaInterface(object):
 
         """
 
+    @abstractproperty
+    def _raw(self):
+        """
+        Returns the raw data of a schema
+
+        """
+
 
 @add_metaclass(HasFieldsMeta)
 class MappingInterface(object):

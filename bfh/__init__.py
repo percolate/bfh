@@ -22,6 +22,24 @@ __all__ = [
 ]
 
 
+def _get_raw_value(value):
+    """
+    Helper to recurse within a schema structure
+
+    """
+    if isinstance(value, SchemaInterface):
+        return value._raw
+
+    elif isinstance(value, (list, tuple)):
+        result = []
+        for i in value:
+            result.append(_get_raw_value(i))
+        return result
+
+    else:
+        return value
+
+
 class Schema(SchemaInterface):
     """
     A base class for defining your schemas:
@@ -40,8 +58,8 @@ class Schema(SchemaInterface):
     def __init__(self, *args, **kwargs):
         """
         Args:
-           Pass a dictionary a single positional argument and it will be
-           tranformed into kwargs.
+           Pass a dictionary as a single positional argument and it will be
+           transformed into kwargs.
 
         Kwargs:
            Values to assign to fields in the schema. Unknown names are ignored.
@@ -74,7 +92,7 @@ class Schema(SchemaInterface):
         name = dedunder(name)
         return object.__getattribute__(self, name)
 
-    def serialize(self, implicit_nulls=True):
+    def serialize(self, implicit_nulls=False):
         """
         Represent this schema as a dictionary.
 
@@ -130,7 +148,8 @@ class Schema(SchemaInterface):
         out = dict(**self._raw_input)
         for name in self._field_names:
             value = getattr(self, name)
-            out[name] = value
+            out[name] = _get_raw_value(value)
+
         return GenericSchema(**out)
 
 
@@ -142,7 +161,7 @@ class GenericSchema(SchemaInterface):
     def __init__(self, **kwargs):
         """
         Args:
-            as_dict (dict) - a blob from which to infer a schema
+            kwargs (dict) - a blob from which to infer a schema
         """
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -150,7 +169,7 @@ class GenericSchema(SchemaInterface):
     def __getattr__(self, name):
         return self.__dict__.get(name)
 
-    def _serialize_value(self, value, implicit_nulls=True):
+    def _serialize_value(self, value, implicit_nulls=False):
         """
         Serialize a value, recursively descending through the object to make
         sure any nested objects are also serialized.
@@ -175,7 +194,7 @@ class GenericSchema(SchemaInterface):
             return None
         return value
 
-    def serialize(self, implicit_nulls=True):
+    def serialize(self, implicit_nulls=False):
         """
         Represent generic schema as a dictionary.
 
@@ -206,6 +225,14 @@ class GenericSchema(SchemaInterface):
     @property
     def is_empty(self):
         return all(nullish(v) for v in self.__dict__.values())
+
+    @property
+    def _raw(self):
+        out = dict(**self.__dict__)
+        for key, val in out.items():
+            out[key] = _get_raw_value(val)
+
+        return GenericSchema(**out)
 
 
 class Mapping(MappingInterface):
