@@ -238,7 +238,7 @@ class TestSchemas(TestCase):
         self.assertEqual(s.get("defaulted"), "testing")
 
     def test_raw_property_gets_all_values_in_tree(self):
-        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+        data = {'first': 1, 'second': {'prop': [1, 2], 'visible': True}}
 
         class Second(Schema):
             prop = IntegerField()
@@ -250,7 +250,7 @@ class TestSchemas(TestCase):
         self.assertIsInstance(_raw, GenericSchema)
         self.assertEqual(_raw.first, 1)
         self.assertIsInstance(_raw.second, GenericSchema)
-        self.assertEqual(_raw.second.prop, 2)
+        self.assertEqual(_raw.second.prop, [1, 2])
         self.assertEqual(_raw.second.visible, True)
 
 
@@ -377,7 +377,7 @@ class TestGenericSchema(TestCase):
                          outer.serialize(implicit_nulls=False))
 
     def test_raw_property_gets_all_values_in_tree(self):
-        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+        data = {'first': 1, 'second': {'prop': [1, 2], 'visible': True}}
 
         class Second(GenericSchema):
             prop = IntegerField()
@@ -389,7 +389,7 @@ class TestGenericSchema(TestCase):
         self.assertIsInstance(_raw, GenericSchema)
         self.assertEqual(_raw.first, 1)
         self.assertIsInstance(_raw.second, GenericSchema)
-        self.assertEqual(_raw.second.prop, 2)
+        self.assertEqual(_raw.second.prop, [1, 2])
         self.assertEqual(_raw.second.visible, True)
 
 
