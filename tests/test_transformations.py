@@ -164,7 +164,6 @@ class TestAll(TestCase):
             second = Subschema(Second)
 
         sch = First(**data)
-        self.assertDictEqual(sch._raw.serialize(), data)
         self.assertDictEqual(data, All()(sch).serialize())
 
     def test_generic_schema_non_strict_all_shows_all_on_subschema(self):
@@ -177,7 +176,6 @@ class TestAll(TestCase):
             second = Subschema(Second)
 
         sch = First(**data)
-        self.assertDictEqual(sch._raw.serialize(), data)
         self.assertDictEqual(data, All()(sch).serialize())
 
 
