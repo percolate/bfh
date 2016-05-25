@@ -7,8 +7,6 @@ from bfh.fields import (
     ArrayField,
     IntegerField,
     Subschema,
-    UnicodeField,
-    ObjectField,
 )
 from bfh.transformations import (
     All,
