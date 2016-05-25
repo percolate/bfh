@@ -22,6 +22,24 @@ __all__ = [
 ]
 
 
+def _get_raw_value(value):
+    """
+    Helper to recurse within a schema structure
+
+    """
+    if isinstance(value, SchemaInterface):
+        return value._raw
+
+    elif isinstance(value, (list, tuple)):
+        result = []
+        for i in value:
+            result.append(_get_raw_value(i))
+        return result
+
+    else:
+        return value
+
+
 class Schema(SchemaInterface):
     """
     A base class for defining your schemas:
@@ -130,7 +148,8 @@ class Schema(SchemaInterface):
         out = dict(**self._raw_input)
         for name in self._field_names:
             value = getattr(self, name)
-            out[name] = value
+            out[name] = _get_raw_value(value)
+
         return GenericSchema(**out)
 
 
@@ -209,7 +228,11 @@ class GenericSchema(SchemaInterface):
 
     @property
     def _raw(self):
-        return self
+        out = dict(**self.__dict__)
+        for key, val in out.items():
+            out[key] = _get_raw_value(val)
+
+        return GenericSchema(**out)
 
 
 class Mapping(MappingInterface):

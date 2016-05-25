@@ -7,7 +7,6 @@ from bfh.fields import (
     ArrayField,
     IntegerField,
     Subschema,
-    UnicodeField,
 )
 from bfh.transformations import (
     All,
@@ -35,6 +34,7 @@ except NameError:
 
 
 class TestAll(TestCase):
+
     def test_all_is_all_by_default(self):
         class Myschema(Schema):
             wow = IntegerField()
@@ -126,6 +126,57 @@ class TestAll(TestCase):
             result = mapping().apply(source).serialize()
             expected = {"obj": {"target": 1}}
             self.assertEqual(expected, result)
+
+    def test_all_on_nested_schema(self):
+        """
+        All should work on nested Schema
+
+        """
+        class ManySchema(Schema):
+            prop = IntegerField()
+
+        class SecondSchema(Schema):
+            those = ArrayField(ManySchema)
+
+        class FirstSchema(Schema):
+            that = Subschema(SecondSchema)
+
+        data = {
+            'that': {
+                'those': [{'prop': 1}, {'prop': 2}]
+            },
+            'whatever': 'right'
+        }
+        sch = FirstSchema(**data)
+
+        self.assertDictEqual(data, All()(sch).serialize())
+
+        del data['whatever']
+        self.assertDictEqual(data, All(strict=True)(sch).serialize())
+
+    def test_schema_non_strict_all_shows_all_on_subschema(self):
+        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+
+        class Second(Schema):
+            prop = IntegerField()
+
+        class First(Schema):
+            second = Subschema(Second)
+
+        sch = First(**data)
+        self.assertDictEqual(data, All()(sch).serialize())
+
+    def test_generic_schema_non_strict_all_shows_all_on_subschema(self):
+        data = {'first': 1, 'second': {'prop': 2, 'visible': True}}
+
+        class Second(GenericSchema):
+            prop = IntegerField()
+
+        class First(GenericSchema):
+            second = Subschema(Second)
+
+        sch = First(**data)
+        self.assertDictEqual(data, All()(sch).serialize())
 
 
 class TestGet(TestCase):
