@@ -129,6 +129,33 @@ class TestAll(TestCase):
             expected = {"obj": {"target": 1}}
             self.assertEqual(expected, result)
 
+    def test_all_on_nested_schema(self):
+        """
+        All should work on nested Schema
+
+        """
+        class ManySchema(Schema):
+            prop = IntegerField()
+
+        class SecondSchema(Schema):
+            those = ArrayField(ManySchema)
+
+        class FirstSchema(Schema):
+            that = Subschema(SecondSchema)
+
+        data = {
+            'that': {
+                'those': [{'prop': 1}, {'prop': 2}]
+            },
+            'whatever': 'right'
+        }
+        sch = FirstSchema(**data)
+
+        self.assertDictEqual(data, All()(sch).serialize())
+
+        del data['whatever']
+        self.assertDictEqual(data, All(strict=True)(sch).serialize())
+
 
 class TestGet(TestCase):
     def test_can_get_from_dict(self):
