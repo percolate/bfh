@@ -376,22 +376,6 @@ class TestGenericSchema(TestCase):
         self.assertEqual(expected_explicit_nulls,
                          outer.serialize(implicit_nulls=False))
 
-    def test_raw_property_gets_all_values_in_tree(self):
-        data = {'first': 1, 'second': {'prop': [1, 2], 'visible': True}}
-
-        class Second(GenericSchema):
-            prop = IntegerField()
-
-        class First(GenericSchema):
-            second = Subschema(Second)
-
-        _raw = First(**data)._raw
-        self.assertIsInstance(_raw, GenericSchema)
-        self.assertEqual(_raw.first, 1)
-        self.assertIsInstance(_raw.second, GenericSchema)
-        self.assertEqual(_raw.second.prop, [1, 2])
-        self.assertEqual(_raw.second.visible, True)
-
 
 class OneToTwoBase(Mapping):
     peas = Get('my_str')
