@@ -248,8 +248,9 @@ class TestSchemas(TestCase):
 
         _raw = First(**data)._raw
         self.assertIsInstance(_raw, GenericSchema)
-        self.assertEqual(_raw.first, 1)
         self.assertIsInstance(_raw.second, GenericSchema)
+
+        self.assertEqual(_raw.first, 1)
         self.assertEqual(_raw.second.prop, [1, 2])
         self.assertEqual(_raw.second.visible, True)
 
@@ -375,6 +376,21 @@ class TestGenericSchema(TestCase):
                          outer.serialize(implicit_nulls=True))
         self.assertEqual(expected_explicit_nulls,
                          outer.serialize(implicit_nulls=False))
+
+    def test_raw_property_gets_all_values_in_tree(self):
+
+        third = GenericSchema(not_junk=False)
+        second = GenericSchema(data=[1, 2, 3], thirdnested=third)
+        first = GenericSchema(some_sub=second)
+
+        _raw = first._raw
+
+        self.assertIsInstance(_raw, GenericSchema)
+        self.assertIsInstance(_raw.some_sub, GenericSchema)
+        self.assertIsInstance(_raw.some_sub.thirdnested, GenericSchema)
+
+        self.assertEqual(_raw.some_sub.data, [1, 2, 3])
+        self.assertEqual(_raw.some_sub.thirdnested.not_junk, False)
 
 
 class OneToTwoBase(Mapping):
