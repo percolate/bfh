@@ -379,6 +379,10 @@ class TestIsoFormatDate(TestCase):
         with self.assertRaises(ValueError):
             DateToIsoString()()
 
+    def test_returns_none_if_arg_is_none(self):
+        result = DateToIsoString(None)()
+        self.assertEqual(None, result)
+
 
 class TestSubmapping(TestCase):
     def test_can_pass_all_to_submap(self):
