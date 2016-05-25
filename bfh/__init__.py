@@ -40,19 +40,7 @@ def _get_raw_value(value):
         return value
 
 
-class SchemaMixin(object):
-
-    @property
-    def _raw(self):
-        out = dict(**self._raw_input)
-        for name in self._field_names:
-            value = getattr(self, name)
-            out[name] = _get_raw_value(value)
-
-        return GenericSchema(**out)
-
-
-class Schema(SchemaMixin, SchemaInterface):
+class Schema(SchemaInterface):
     """
     A base class for defining your schemas:
 
@@ -155,8 +143,17 @@ class Schema(SchemaMixin, SchemaInterface):
                 return False
         return True
 
+    @property
+    def _raw(self):
+        out = dict(**self._raw_input)
+        for name in self._field_names:
+            value = getattr(self, name)
+            out[name] = _get_raw_value(value)
 
-class GenericSchema(SchemaMixin, SchemaInterface):
+        return GenericSchema(**out)
+
+
+class GenericSchema(SchemaInterface):
     """
     A generic schema to use when none is specified.
 
@@ -228,6 +225,15 @@ class GenericSchema(SchemaMixin, SchemaInterface):
     @property
     def is_empty(self):
         return all(nullish(v) for v in self.__dict__.values())
+
+    @property
+    def _raw(self):
+        out = dict(**self.__dict__)
+        for name in self._field_names:
+            value = getattr(self, name)
+            out[name] = _get_raw_value(value)
+
+        return GenericSchema(**out)
 
 
 class Mapping(MappingInterface):
