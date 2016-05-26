@@ -332,10 +332,11 @@ class ArrayField(SimpleTypeField):
         self.array_type = array_type
 
     def __set__(self, instance, value):
-        # don't coerce simple Python types here; under the current regime
-        # that happens at serialization. just set the value.
+        # don't coerce or validate simple Python types here; under the current
+        # regime those happen elsewhere. just set the value.
         if (self.array_type is None
-                or not issubclass(self.array_type, SchemaInterface)):
+                or not issubclass(self.array_type, SchemaInterface)
+                or not isinstance(value, self.field_type)):
             instance.__dict__[self.field_name] = value
             return
 
