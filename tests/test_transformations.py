@@ -65,7 +65,7 @@ class TestAll(TestCase):
         m2 = Myschema()
 
         self.assertEqual(first, All()(m).serialize())
-        self.assertEqual({'wow': None}, All()(m2).serialize(implicit_nulls=False))
+        self.assertEqual({}, All()(m2).serialize())
 
     def test_all_passes_dict(self):
         source = {"foo": "bar", "wow": None}
@@ -517,8 +517,8 @@ class TestSubmapping(TestCase):
             None,
         ]
         for source in empties:
-            self.assertEqual({}, Outer().apply(source).serialize(implicit_nulls=True))
-            self.assertEqual({}, OuterNoschema().apply(source).serialize(implicit_nulls=True))
+            self.assertEqual({}, Outer().apply(source).serialize())
+            self.assertEqual({}, OuterNoschema().apply(source).serialize())
 
 
 class TestIdempotence(TestCase):
@@ -567,15 +567,20 @@ class TestMany(TestCase):
 
         source = {"wow": []}
         expected = {}
-        transformed = Simpler().apply(source).serialize(implicit_nulls=True)
+        transformed = Simpler().apply(source).serialize()
         self.assertEqual(expected, transformed)
 
         source = {"wow": None}
         expected = {}
-        transformed = Simpler().apply(source).serialize(implicit_nulls=True)
+        transformed = Simpler().apply(source).serialize()
         self.assertEqual(expected, transformed)
 
     def test_many_submap(self):
+        class Inner(Schema):
+            wow = UnicodeField()
+
+        class Source(Schema):
+            items = ArrayField(Subschema(Inner))
 
         class Sub(Mapping):
             inner = Get('wow')
@@ -604,7 +609,7 @@ class TestMany(TestCase):
 
         source = {"items": []}
         expected = {"const": 1}
-        transformed = WithConst().apply(source).serialize(implicit_nulls=True)
+        transformed = WithConst().apply(source).serialize()
         self.assertEqual(expected, transformed)
 
         class Deep(Mapping):
@@ -616,11 +621,11 @@ class TestMany(TestCase):
             }
         }
         expected = {}
-        transformed = Deep().apply(source).serialize(implicit_nulls=True)
+        transformed = Deep().apply(source).serialize()
         self.assertEqual(expected, transformed)
 
         class HasNone(Mapping):
             inner = ManySubmap(Sub, Const(None))
 
-        transformed = HasNone().apply({}).serialize(implicit_nulls=True)
+        transformed = HasNone().apply({}).serialize()
         self.assertEqual({}, transformed)
