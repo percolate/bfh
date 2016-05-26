@@ -417,10 +417,14 @@ class TestNoneSafe(TestCase):
         class My(Schema):
             stuff = ArrayField(Sub, required=False)
 
-        # these may or may not be valid, but should not error on init
-        assert My(stuff=[{"foo": "bar"}])
-        assert My(stuff=[Sub(foo="bar")])
-        assert My(stuff=[1, 2, 3])
-        assert My(stuff=[])
-        assert My()
-        assert My(stuff=None)
+        class My2(Schema):
+            stuff = ArrayField(Sub, required=True)
+
+        for cls in (My, My2):
+            # these may or may not be valid, but should not error on init
+            assert cls(stuff=[{"foo": "bar"}])
+            assert cls(stuff=[Sub(foo="bar")])
+            assert cls(stuff=[1, 2, 3])
+            assert cls(stuff=[])
+            assert cls()
+            assert cls(stuff=None)
