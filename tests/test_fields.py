@@ -402,3 +402,29 @@ class TestSubSchemaCoercion(TestCase):
 
         my_outer = Outer(inner={"foo": "bar"})
         self.assertIsInstance(my_outer.inner, Inner)
+
+
+class TestNoneSafe(TestCase):
+    """
+    When a field is not required, it should accept None as a value.
+
+    ... and even when it is a required, it should accept None without an error.
+    """
+    def test_array_none_safe(self):
+        class Sub(Schema):
+            foo = UnicodeField()
+
+        class My(Schema):
+            stuff = ArrayField(Sub, required=False)
+
+        class My2(Schema):
+            stuff = ArrayField(Sub, required=True)
+
+        for cls in (My, My2):
+            # these may or may not be valid, but should not error on init
+            assert cls(stuff=[{"foo": "bar"}])
+            assert cls(stuff=[Sub(foo="bar")])
+            assert cls(stuff=[1, 2, 3])
+            assert cls(stuff=[])
+            assert cls()
+            assert cls(stuff=None)

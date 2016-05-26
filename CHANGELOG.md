@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.6.1
+
+- Bugfix: `ArrayField` shouldn't error on init when not required or
+  with invalid value.
+
 ## 0.6.0
 
 - Breaking change: When `ArrayField` declared with a Schema type as
