@@ -109,11 +109,11 @@ class Schema(SchemaInterface):
         for name in self._field_names:
             field = self._fields.get(name)
             value = getattr(self, name)
-            if hasattr(value, "serialize"):
-                value = value.serialize(implicit_nulls=implicit_nulls)
-
             if hasattr(field, "serialize"):
                 value = field.serialize(value, implicit_nulls=implicit_nulls)
+
+            if hasattr(value, "serialize"):
+                value = value.serialize(implicit_nulls=implicit_nulls)
 
             if implicit_nulls and nullish(value,
                                           implicit_nulls=implicit_nulls):
