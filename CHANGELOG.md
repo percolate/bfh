@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.6.2
+
+- Bugfix: Call field serialize method before value serialize method
+  so that fields may override behavior of the values they contain.
+
 ## 0.6.1
 
 - Bugfix: `ArrayField` shouldn't error on init when not required or
