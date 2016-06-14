@@ -18,6 +18,7 @@ doc:
 	make -C doc html
 	rm -rf doc/site
 	cp -r doc/_build/html doc/site
+	cp doc/_config.yml doc/site/_config.yml
 	rm -rf venv-doc
 	# **********************************************************
 	# now run git subtree push --prefix doc/site origin gh-pages
