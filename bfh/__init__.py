@@ -12,6 +12,7 @@ from . import fields
 from . import transformations
 
 from .version import __version__
+assert __version__
 
 __all__ = [
     "Schema",
@@ -46,7 +47,7 @@ class Schema(SchemaInterface):
 
     Declare the shape of an object you expect to handle.
 
-    Just inherit this and add some fields:
+    Just inherit this and add some fields::
 
         class Animal(Schema):
             name = UnicodeField()
@@ -58,11 +59,10 @@ class Schema(SchemaInterface):
     def __init__(self, *args, **kwargs):
         """
         Args:
-           Pass a dictionary as a single positional argument and it will be
-           transformed into kwargs.
+           *args: Pass a dictionary as a single positional argument and it will
+           be transformed into kwargs.
 
-        Kwargs:
-           Values to assign to fields in the schema. Unknown names are ignored.
+           **kwargs: Values to assign to fields in the schema. Unknown names are ignored.
         """
         # when a dict is passed as positional argument, transform to kwargs
         if len(args) == 1 and isinstance(args[0], dict):
@@ -99,8 +99,8 @@ class Schema(SchemaInterface):
         Handy for dumping to json or some other further serialization format,
         or splatting into an object constructor.
 
-        Kwargs:
-            implicit_nulls (Bool) - drop any keys whose value is nullish
+        Args:
+            implicit_nulls (bool): drop any keys whose value is nullish
 
         Returns:
             dict
@@ -198,8 +198,8 @@ class GenericSchema(SchemaInterface):
         """
         Represent generic schema as a dictionary.
 
-        Kwargs:
-            implicit_nulls (Bool) - drop any keys whose value is nullish
+        Args:
+            implicit_nulls (bool): drop any keys whose value is nullish
 
         Returns:
             dict
@@ -241,7 +241,7 @@ class Mapping(MappingInterface):
 
     Declare a transformation from one shape to another shape.
 
-    Just inherit this and add some fields:
+    Just inherit this and add some fields::
 
         class DogToAnimal(Mapping):
             source_schema = Dog
@@ -252,17 +252,17 @@ class Mapping(MappingInterface):
             legs = Const(4)
             noise = Const('woof!')
 
-    The action happens when you get an instance of your mapping:
+    The action happens when you get an instance of your mapping::
 
         dog_to_animal_map = DogToAnimal()
 
-    Then apply it to an object. You get a Schema instance:
+    Then apply it to an object. You get a Schema instance::
 
         my_animal = dog_to_animal_map.apply(my_dog)
         type(my_animal)
         # __main__.Animal
 
-    ... which is full of values:
+    ... which is full of values::
 
         my_animal.serialize()
         # {"name": "Fido", "type": "dog", "legs": 4, "noise": "woof!}
@@ -273,7 +273,7 @@ class Mapping(MappingInterface):
         Take the mapping and push a blob through it.
 
         Args:
-            blob (dict or Schema) - the thing to transform
+            blob (dict or Schema): the thing to transform
 
         Returns:
             instance of `self.target_schema` (if declared) or GenericSchema
