@@ -16,8 +16,12 @@ doc:
 	venv-doc/bin/pip install sphinx
 	venv-doc/bin/pip install -e .
 	make -C doc html
+	rm -rf doc/site
 	cp -r doc/_build/html doc/site
 	rm -rf venv-doc
+	# **********************************************************
+	# now run git subtree push --prefix doc/site origin gh-pages
+	# **********************************************************
 
 release:
 	rm -rf dist/
