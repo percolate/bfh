@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bfh.fields &mdash; bfh 0.6.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="bfh 0.6.2 documentation" href="index.html" />
+    <link rel="next" title="bfh.transformations" href="transformations.html" />
+    <link rel="prev" title="bfh.exceptions" href="exceptions.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bfh.fields">
+<span id="bfh-fields"></span><h1>bfh.fields<a class="headerlink" href="#module-bfh.fields" title="Permalink to this headline">¶</a></h1>
+<p>Fields that can go on Schemas</p>
+<p>Included are the common data types you&#8217;ll probably need, and a generic <cite>Field</cite>
+class so you can implement your own if you want.</p>
+<dl class="class">
+<dt id="bfh.fields.Field">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">Field</code><span class="sig-paren">(</span><em>required=True</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.Field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for a field.</p>
+<p>You can create custom fields if you inherit this and implement
+<cite>serialize</cite> and <cite>validate</cite> as desired:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>class AngryField(Field):</dt>
+<dd><dl class="first last docutils">
+<dt>def serialize(self, value, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs):</dt>
+<dd>return &#8220;I HATE YOU&#8221;</dd>
+<dt>def validate(self, value):</dt>
+<dd>return False</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.ArrayField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">ArrayField</code><span class="sig-paren">(</span><em>array_type=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.ArrayField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that can contain an array of things of type <cite>array_type</cite></p>
+<blockquote>
+<div><dl class="docutils">
+<dt>class Inner(Schema):</dt>
+<dd>wow = IntegerField()</dd>
+<dt>class MySchema(Schema):</dt>
+<dd>ints = ArrayField(int)
+inners = ArrayField(Inner)</dd>
+</dl>
+</div></blockquote>
+<p>indicates an object that looks like so:</p>
+<blockquote>
+<div>{&#8220;ints&#8221;: [1, 2, 3], &#8220;inners&#8221;: [{&#8220;wow&#8221;: 4}, {&#8220;wow&#8221;: 5}]}</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.BooleanField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">BooleanField</code><span class="sig-paren">(</span><em>required=True</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.BooleanField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that should contain a boolean.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.DatetimeField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">DatetimeField</code><span class="sig-paren">(</span><em>required=True</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.DatetimeField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that should contain a Python datetime object.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.IsoDateString">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">IsoDateString</code><span class="sig-paren">(</span><em>strict=False</em>, <em>encoding='utf-8'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.IsoDateString" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string field that validates that it contains an ISO 8601 date string</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.IntegerField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">IntegerField</code><span class="sig-paren">(</span><em>required=True</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.IntegerField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that should contain an integer.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.NumberField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">NumberField</code><span class="sig-paren">(</span><em>required=True</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.NumberField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that should contain a floating-point number.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.ObjectField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">ObjectField</code><span class="sig-paren">(</span><em>required=True</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.ObjectField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that can contain a schemaless dict or object.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.Subschema">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">Subschema</code><span class="sig-paren">(</span><em>subschema_class</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.Subschema" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that defines a subschema.</p>
+<p>Define one schema, then you can use this field to embed it in another:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>class Inner(Schema):</dt>
+<dd># some fields</dd>
+<dt>class MySchema(Schema):</dt>
+<dd>inner = Subschema(Inner)
+# more fields</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.fields.UnicodeField">
+<em class="property">class </em><code class="descclassname">bfh.fields.</code><code class="descname">UnicodeField</code><span class="sig-paren">(</span><em>strict=False</em>, <em>encoding='utf-8'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.fields.UnicodeField" title="Permalink to this definition">¶</a></dt>
+<dd><p>A field that contains strings.</p>
+<p>Expect unicode. If it&#8217;s not already unicode, assume it&#8217;s utf-8 and
+transform it to unicode.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="exceptions.html" title="previous chapter">bfh.exceptions</a></li>
+      <li>Next: <a href="transformations.html" title="next chapter">bfh.transformations</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/fields.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Evan Bender.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/fields.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

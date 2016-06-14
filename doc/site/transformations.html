@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bfh.transformations &mdash; bfh 0.6.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="bfh 0.6.2 documentation" href="index.html" />
+    <link rel="prev" title="bfh.fields" href="fields.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bfh.transformations">
+<span id="bfh-transformations"></span><h1>bfh.transformations<a class="headerlink" href="#module-bfh.transformations" title="Permalink to this headline">¶</a></h1>
+<p>Transformations that can go on Mappings.</p>
+<p>They are not used alone, but rather declared on a mapping. They may
+be combined in various ways:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyMapping</span><span class="p">(</span><span class="n">Mapping</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Concat</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">Str</span><span class="p">(</span><span class="n">Get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">)))</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    <span class="n">squared</span> <span class="o">=</span> <span class="n">Do</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">Get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>When you <cite>apply</cite> a mapping to an object, the transformations
+filter and munge that object into the form of the output schema.</p>
+<ul class="simple">
+<li>You can <cite>Get</cite> the value from a field and pass it somewhere.</li>
+<li>You can use <cite>All</cite> to pass the whole input object somewhere.</li>
+<li>You can coerce a value into a type with <cite>Bool</cite>, <cite>Int</cite>, <cite>Num</cite>, or <cite>Str</cite>.</li>
+<li>You can <cite>Concat</cite> some values together into one value.</li>
+<li>You can use <cite>Many</cite> to group some values into a list.</li>
+<li>You can pass a constant value with <cite>Const</cite> no matter what the input object</li>
+<li>You can <cite>Do</cite> arbitrary functions on input.</li>
+<li>You can nest mappings inside others with <cite>Submapping</cite> and <cite>ManySubmap</cite></li>
+</ul>
+<dl class="class">
+<dt id="bfh.transformations.All">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">All</code><span class="sig-paren">(</span><em>strict=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.All" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the <em>whole darn source object</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strict</strong> (<em>bool</em>) &#8211; If the object is a schema, drop any extra keys
+that don&#8217;t appear in the schema.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">If strict == False and called on a Schema instance, a GenericSchema
+Otherwise just the object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Bool">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Bool</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Bool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerce input to a boolean</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Concat">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Concat</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Concat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concat some strings into a single string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>*args</strong> &#8211; strings to concatenate</li>
+<li><strong>strict</strong> (<em>bool, default False</em>) &#8211; if not strict, ignore None</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Const">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Const</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Const" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a constant value.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Do">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Do</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Do" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do an arbitrary thing to something.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyMapping</span><span class="p">(</span><span class="n">Mapping</span><span class="p">):</span>
+    <span class="n">squared</span> <span class="o">=</span> <span class="n">Do</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">Get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">))</span>
+
+<span class="n">MyMapping</span><span class="p">()</span><span class="o">.</span><span class="n">apply</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="c1"># {&#39;squared&#39;: 4}</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*args</strong> &#8211; the first positional arg to the constructor should be a
+callable. this callable is applied to the input generated by any
+transformations passed in the subsequent args</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Get">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Get</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a value from a dict or object</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="n">Get</span><span class="p">(</span><span class="s2">&quot;my_thing&quot;</span><span class="p">)({</span><span class="s2">&quot;my_thing&quot;</span><span class="p">:</span> <span class="s2">&quot;get this&quot;</span><span class="p">})</span>
+<span class="c1"># value == &quot;get this&quot;</span>
+</pre></div>
+</div>
+<p>Fetch values from complex objects by passing multiple arguments:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="n">Get</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">)({</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}})</span>
+<span class="c1"># value == 1</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>*args</strong> &#8211; a series of names to follow into object and subobject.</li>
+<li><strong>required</strong> (<em>bool, default False</em>) &#8211; error if names missing</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">fetched value or None if <cite>required</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">Missing if <cite>required</cite> is false</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Int">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Int</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Int" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerce input to an integer</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Many">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Many</code><span class="sig-paren">(</span><em>subtrans</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Many" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an array from a series of values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subtrans</strong> (<em>Transformation</em>) &#8211; transformation to apply to all input
+items</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">results of applying subtransformation to each item in the input</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.ManySubmap">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">ManySubmap</code><span class="sig-paren">(</span><em>submapping_class</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.ManySubmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map an array of complex objects onto a subschema.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">results of applying submapping to each item in the input</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Num">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Num</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerce input to a floating point number</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Str">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Str</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coerce input to a unicode string</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.transformations.Submapping">
+<em class="property">class </em><code class="descclassname">bfh.transformations.</code><code class="descname">Submapping</code><span class="sig-paren">(</span><em>submapping_class</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.transformations.Submapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map a complex subobject into a subschema.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>submapping_class</strong> (<a class="reference internal" href="bfh.html#bfh.Mapping" title="bfh.Mapping"><em>bfh.Mapping</em></a>) &#8211; a mapping</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">result of applying submapping to the input</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fields.html" title="previous chapter">bfh.fields</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/transformations.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Evan Bender.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/transformations.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

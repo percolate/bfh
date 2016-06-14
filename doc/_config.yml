@@ -1,0 +1,4 @@
+# jekyll config for deploy on github pages
+
+# force include of _static directory
+include: [_static]

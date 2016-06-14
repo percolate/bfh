@@ -1,11 +1,10 @@
 *.egg-info/
 *.pyc
 __pycache__
-/doc/html/
+/doc/_build/
 /build/
 /dist/
 /.cache/
 /.coverage
 /.tox/
-/venv2/
-/venv3/
+/venv*/
