@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bfh &mdash; bfh 0.6.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="bfh 0.6.2 documentation" href="index.html" />
+    <link rel="next" title="bfh.exceptions" href="exceptions.html" />
+    <link rel="prev" title="bfh" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bfh.__init__">
+<span id="bfh"></span><h1>bfh<a class="headerlink" href="#module-bfh.__init__" title="Permalink to this headline">¶</a></h1>
+<p>BFH: a library for mapping schemas to other schemas.</p>
+<dl class="class">
+<dt id="bfh.Schema">
+<em class="property">class </em><code class="descclassname">bfh.</code><code class="descname">Schema</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.Schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>A base class for defining your schemas:</p>
+<p>Declare the shape of an object you expect to handle.</p>
+<p>Just inherit this and add some fields:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Animal</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">UnicodeField</span><span class="p">()</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">UnicodeField</span><span class="p">()</span>
+    <span class="n">legs</span> <span class="o">=</span> <span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">UnicodeField</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="bfh.Schema.serialize">
+<code class="descname">serialize</code><span class="sig-paren">(</span><em>implicit_nulls=False</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.Schema.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represent this schema as a dictionary.</p>
+<p>Handy for dumping to json or some other further serialization format,
+or splatting into an object constructor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>implicit_nulls</strong> (<em>bool</em>) &#8211; drop any keys whose value is nullish</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bfh.Schema.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bfh.Schema.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate the values in the schema.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Invalid</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bfh.Mapping">
+<em class="property">class </em><code class="descclassname">bfh.</code><code class="descname">Mapping</code><a class="headerlink" href="#bfh.Mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>A base class for defining your mappings:</p>
+<p>Declare a transformation from one shape to another shape.</p>
+<p>Just inherit this and add some fields:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DogToAnimal</span><span class="p">(</span><span class="n">Mapping</span><span class="p">):</span>
+    <span class="n">source_schema</span> <span class="o">=</span> <span class="n">Dog</span>
+    <span class="n">target_schema</span> <span class="o">=</span> <span class="n">Animal</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Get</span><span class="p">(</span><span class="s1">&#39;dogname&#39;</span><span class="p">)</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="s1">&#39;dog&#39;</span><span class="p">)</span>
+    <span class="n">legs</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">Const</span><span class="p">(</span><span class="s1">&#39;woof!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The action happens when you get an instance of your mapping:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dog_to_animal_map</span> <span class="o">=</span> <span class="n">DogToAnimal</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then apply it to an object. You get a Schema instance:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_animal</span> <span class="o">=</span> <span class="n">dog_to_animal_map</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">my_dog</span><span class="p">)</span>
+<span class="nb">type</span><span class="p">(</span><span class="n">my_animal</span><span class="p">)</span>
+<span class="c1"># __main__.Animal</span>
+</pre></div>
+</div>
+<p>... which is full of values:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_animal</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="c1"># {&quot;name&quot;: &quot;Fido&quot;, &quot;type&quot;: &quot;dog&quot;, &quot;legs&quot;: 4, &quot;noise&quot;: &quot;woof!}</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="bfh.Mapping.apply">
+<code class="descname">apply</code><span class="sig-paren">(</span><em>blob</em><span class="sig-paren">)</span><a class="headerlink" href="#bfh.Mapping.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take the mapping and push a blob through it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>blob</strong> (<em>dict or Schema</em>) &#8211; the thing to transform</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">instance of <cite>self.target_schema</cite> (if declared) or GenericSchema</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">bfh</a></li>
+      <li>Next: <a href="exceptions.html" title="next chapter">bfh.exceptions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bfh.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Evan Bender.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/bfh.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

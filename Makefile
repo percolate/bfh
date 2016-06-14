@@ -16,6 +16,8 @@ doc:
 	venv-doc/bin/pip install sphinx
 	venv-doc/bin/pip install -e .
 	make -C doc html
+	cp -r doc/_build/html doc/site
+	rm -rf venv-doc
 
 release:
 	rm -rf dist/
