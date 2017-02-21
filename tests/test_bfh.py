@@ -488,8 +488,8 @@ class TestMappings(TestCase):
             transformed.serialize(implicit_nulls=True)
         )
 
-    def test_Get_empty_fields_with_defaults(self):
-        """We aren't making assumptions here. Call validate if you want it."""
+    def test_get_empty_fields_with_defaults(self):
+        """Allow Get to have defaults"""
         class FirstSchema(Schema):
             wow = IntegerField(required=True)
             umm = IntegerField(required=False)
@@ -503,7 +503,7 @@ class TestMappings(TestCase):
             target_schema = OtherSchema
 
             cool = Get('wow')
-            bad = Get('umm', default="af")
+            bad = Get('umm', default=3)
 
         source = FirstSchema(wow=1)
         assert source.validate()
@@ -512,7 +512,7 @@ class TestMappings(TestCase):
         assert transformed.validate()
 
         self.assertEqual(
-            {"cool": 1, "bad": "af"},
+            {"cool": 1, "bad": 3},
             transformed.serialize(implicit_nulls=True)
         )
 
