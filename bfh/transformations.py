@@ -111,18 +111,19 @@ class Get(TransformationInterface):
         self.path = args
         self.kwargs = kwargs
         self.required = kwargs.get('required', False)
+        self.default = kwargs.get('default')
 
     def __call__(self, source):
         return self.function(source)
 
     def _get_from_dict(self, source, path):
         if not self.required:
-            return source.get(path)
+            return source.get(path, self.default)
         return source[path]
 
     def _get_from_obj(self, source, path):
         if not self.required:
-            return getattr(source, path, None)
+            return getattr(source, path, self.default)
         return getattr(source, path)
 
     def _get(self, source, path):

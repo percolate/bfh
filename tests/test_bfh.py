@@ -483,7 +483,38 @@ class TestMappings(TestCase):
         with self.assertRaises(Invalid):
             transformed.validate()
 
-        self.assertEqual({"cool": 1}, transformed.serialize(implicit_nulls=True))
+        self.assertEqual(
+            {"cool": 1},
+            transformed.serialize(implicit_nulls=True)
+        )
+
+    def test_Get_empty_fields_with_defaults(self):
+        """We aren't making assumptions here. Call validate if you want it."""
+        class FirstSchema(Schema):
+            wow = IntegerField(required=True)
+            umm = IntegerField(required=False)
+
+        class OtherSchema(Schema):
+            cool = IntegerField(required=True)
+            bad = IntegerField(required=True)
+
+        class Mymap(Mapping):
+            source_schema = FirstSchema
+            target_schema = OtherSchema
+
+            cool = Get('wow')
+            bad = Get('umm', default="af")
+
+        source = FirstSchema(wow=1)
+        assert source.validate()
+
+        transformed = Mymap().apply(source)
+        assert transformed.validate()
+
+        self.assertEqual(
+            {"cool": 1, "bad": "af"},
+            transformed.serialize(implicit_nulls=True)
+        )
 
 
 class TestInheritance(TestCase):
