@@ -524,13 +524,13 @@ class TestMappings(TestCase):
 
         class Mymap(Mapping):
             target_schema = MySchema
-            content = Get('post', 'caption', 'text')
+            content = Get('post', 'caption', 'text', default="")
 
         transformed = Mymap().apply({"post": {"content": None}})
         assert transformed.validate()
 
         self.assertEqual(
-            {"content": None},
+            {"content": ""},
             transformed.serialize(implicit_nulls=True)
         )
 
