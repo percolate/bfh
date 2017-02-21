@@ -516,6 +516,24 @@ class TestMappings(TestCase):
             transformed.serialize(implicit_nulls=True)
         )
 
+    def test_path_to_none(self):
+        """Test partial path get"""
+
+        class MySchema(Schema):
+            content = UnicodeField()
+
+        class Mymap(Mapping):
+            target_schema = MySchema
+            content = Get('post', 'caption', 'text')
+
+        transformed = Mymap().apply({"post": {"content": None}})
+        assert transformed.validate()
+
+        self.assertEqual(
+            {"content": None},
+            transformed.serialize(implicit_nulls=True)
+        )
+
 
 class TestInheritance(TestCase):
     """Verify that the metaprogramming tricks didn't go awry"""
