@@ -483,7 +483,56 @@ class TestMappings(TestCase):
         with self.assertRaises(Invalid):
             transformed.validate()
 
-        self.assertEqual({"cool": 1}, transformed.serialize(implicit_nulls=True))
+        self.assertEqual(
+            {"cool": 1},
+            transformed.serialize(implicit_nulls=True)
+        )
+
+    def test_get_empty_fields_with_defaults(self):
+        """Allow Get to have defaults"""
+        class FirstSchema(Schema):
+            wow = IntegerField(required=True)
+            umm = IntegerField(required=False)
+
+        class OtherSchema(Schema):
+            cool = IntegerField(required=True)
+            bad = IntegerField(required=True)
+
+        class Mymap(Mapping):
+            source_schema = FirstSchema
+            target_schema = OtherSchema
+
+            cool = Get('wow')
+            bad = Get('umm', default=3)
+
+        source = FirstSchema(wow=1)
+        assert source.validate()
+
+        transformed = Mymap().apply(source)
+        assert transformed.validate()
+
+        self.assertEqual(
+            {"cool": 1, "bad": 3},
+            transformed.serialize(implicit_nulls=True)
+        )
+
+    def test_path_to_none(self):
+        """Test partial path get"""
+
+        class MySchema(Schema):
+            content = UnicodeField()
+
+        class Mymap(Mapping):
+            target_schema = MySchema
+            content = Get('post', 'caption', 'text', default="")
+
+        transformed = Mymap().apply({"post": {"content": None}})
+        assert transformed.validate()
+
+        self.assertEqual(
+            {"content": ""},
+            transformed.serialize(implicit_nulls=True)
+        )
 
 
 class TestInheritance(TestCase):
