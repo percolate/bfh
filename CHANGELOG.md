@@ -46,7 +46,6 @@
   code manipulates the return value of Mapping.apply() or otherwise
   uses these objects without serialization.
 
-
 ## 0.4.1
 
 - Bugfix: state was incorrectly being stored on schema class rather
