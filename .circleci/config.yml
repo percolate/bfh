@@ -1,0 +1,25 @@
+version: 2
+
+workflows:
+  version: 2
+  phaser:
+    jobs:
+      - mdl
+      - tox
+
+jobs:
+
+  mdl:
+    docker:
+      - image: rsrchboy/mdl
+    steps:
+      - checkout
+      - run: mdl .
+
+  tox:
+    docker:
+      - image: themattrix/tox
+    steps:
+      - checkout
+      - run: pip install
+      - run: tox

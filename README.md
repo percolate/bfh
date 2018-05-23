@@ -2,7 +2,7 @@
 
 A Python DSL for schema transformations
 
-Docs: http://percolate.github.io/bfh/
+Docs: <http://percolate.github.io/bfh/>
 
 ![bfh](http://timberframe-postandbeamhomes.com/media/uploads/galleries/trusses/naked_trusses/iain_with_beatle_hammer.jpg)
 
@@ -44,7 +44,11 @@ transformed['diameter']
 # 70.71067811865476
 ```
 
-BFH is a DSL for mapping blobs to other blobs. It can map dict-ish or object-ish things... as long as you got names and the names got values, you can whack it into shape. The use of explicit schema objects is *totally optional*... a mapping can be used without input and output schemas... the names in the mapping are all you *really* need. Viz.
+BFH is a DSL for mapping blobs to other blobs. It can map dict-ish or object-ish
+things... as long as you got names and the names got values, you can whack it
+into shape. The use of explicit schema objects is *totally optional*... a
+mapping can be used without input and output schemas... the names in the mapping
+are all you *really* need. Viz.
 
 ```python
 
@@ -66,12 +70,14 @@ output.serialize().keys()
 
 ```
 
-Explicit schemas, however, can help preserve your sanity when things get complex.
-
+Explicit schemas, however, can help preserve your sanity when things get
+complex.
 
 ## Validation
 
-While BFH can validate a schema, it's not primarily a validation library, OK? There are lots of those out there, so we don't get too fancy here. Just some sanity checking.
+While BFH can validate a schema, it's not primarily a validation library, OK?
+There are lots of those out there, so we don't get too fancy here. Just some
+sanity checking.
 
 ```python
 my_peg = SquarePeg(id=1, name="peggy", width=50)
@@ -84,15 +90,14 @@ broken_peg.validate()
 
 ```
 
-
 ## Reserved Words
 
-Obviously your schema needs a field called 'if' or 'finally'. Use a double-underscore name and all will be well:
+Obviously your schema needs a field called 'if' or 'finally'. Use a
+double-underscore name and all will be well:
 
     class Fancy(Schema):
         # if = IntegerField()  # Ouch! SyntaxError!
         __if = IntegerField()
-
 
 You can init in any of these ways:
 
@@ -100,15 +105,14 @@ You can init in any of these ways:
     Fancy(**{"__if": 1})
     Fancy(**{"if": 1})
 
-
 In a mapping, use the de-dundered name
 
     Get("if")
 
-
 ## Implicit null values and serialization
 
 Given a sample dataset:
+
 ```json
     {
         "name": "peg",
@@ -117,19 +121,20 @@ Given a sample dataset:
 ```
 
 If you call serialize with the default kwargs, you would get the following behavior:
+
 ```python
 transformed = SomeMapping().apply(parsed_data).serialize()
 >>> {'name': 'peg', 'age': None}
 ```
 
 But if `implicit_nulls` is set to True, you would get:
+
 ```python
 transformed = SomeMapping().apply(parsed_data).serialize(implicit_nulls=True)
 >>> {'name': 'peg'}
 ```
 
 This can be useful to filter out null values from a dataset on serialization.
-
 
 ## Build Status
 
